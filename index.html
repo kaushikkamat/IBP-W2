@@ -1,0 +1,2199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Farm to First Bite</title>
+<meta name="description" content="A 60-second Nutrielle by IBP mobile game: harvest ragi in Karnataka, bake perfect cookies past quality control, deliver them by truck, and take the first bite.">
+<meta name="theme-color" content="#4E6B2E">
+<meta property="og:title" content="Farm to First Bite">
+<meta property="og:description" content="Take Nutrielle's ragi from a partner farm in Karnataka to your first bite in 60 seconds.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%238F5530'/%3E%3Ccircle cx='22' cy='26' r='3' fill='%233E1E10'/%3E%3Ccircle cx='38' cy='40' r='3' fill='%233E1E10'/%3E%3Ccircle cx='40' cy='22' r='2.5' fill='%23E8C98C'/%3E%3Ccircle cx='24' cy='42' r='2.5' fill='%23E8C98C'/%3E%3Ccircle cx='54' cy='10' r='12' fill='%23F6EEDB'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&family=Kalam:wght@400;700&family=Rozha+One&display=swap">
+<style>
+:root {
+  /* Layout: a phone-shaped card (max 400px wide) centred on a quiet field-toned page.
+     A slim "journey" HUD runs across the top; below it one play area swaps between
+     canvas scenes (farm, road) and DOM scenes (kitchen, first bite, scorecard). */
+  --page: #D8D2BA;
+  --page-ink: #34422A;
+  --cream: #F6EEDB;
+  --cream-2: #EADDBC;
+  --paper: #FFFAEE;
+  --olive: #4E6B2E;
+  --olive-deep: #2A3D1C;
+  --olive-soft: #8DA567;
+  --gold: #C99A3B;
+  --gold-soft: #F0D38A;
+  --ragi: #7A3E22;
+  --millet: #D9A441;
+  --qc: #A0452F;
+  --ink: #2A3D1C;
+  --ink-2: #5A6948;
+  --line: rgba(42, 61, 28, .16);
+  --font-display: "Rozha One", "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-body: "Hind", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --font-hand: "Kalam", "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive;
+}
+/* Only the page around the card follows the viewer's theme; the card keeps Nutrielle's pack colours. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --page: #141B10; --page-ink: #D8DFC4; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --page: #141B10; --page-ink: #D8DFC4; color-scheme: dark; }
+
+:root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+[hidden] { display: none !important; }
+html { height: 100%; box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  height: 100%; margin: 0;
+  background: var(--page); color: var(--page-ink);
+  font-family: var(--font-body);
+  padding-block: 12px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+@media (max-width: 440px) { body { padding-block: 8px; } }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* ---------- Game card ---------- */
+.game {
+  position: relative; width: 100%; max-width: 400px; height: 100%; max-height: 800px; margin: 0 auto;
+  display: flex; flex-direction: column; overflow: hidden; isolation: isolate;
+  background: var(--cream); color: var(--ink);
+  border-radius: 26px;
+  box-shadow: 0 18px 50px rgba(20, 30, 12, .28);
+  touch-action: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.ico { width: 18px; height: 18px; flex: none; }
+
+/* ---------- HUD ---------- */
+.hud { flex: none; display: grid; gap: 6px; padding: 10px 14px 9px; background: var(--paper); border-bottom: 1px solid var(--line); z-index: 6; }
+.hud-top { display: flex; align-items: center; gap: 12px; }
+.stage-chip { display: inline-flex; align-items: center; gap: 8px; margin-right: auto; min-width: 0; white-space: nowrap; font: 400 20px/1 var(--font-display); color: var(--olive-deep); }
+.stage-num { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--olive); color: var(--paper); font: 700 13px/1 var(--font-body); padding-top: 2px; }
+.hud-stat { display: grid; justify-items: end; gap: 2px; }
+.hud-label { font: 600 9.5px/1 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
+.hud-val { font: 700 18px/1 var(--font-body); font-variant-numeric: tabular-nums; color: var(--olive-deep); }
+.hud-stat.is-low .hud-val { color: var(--qc); animation: pulse .5s ease-in-out infinite alternate; }
+.icon-btn { width: 34px; height: 34px; padding: 0; border-radius: 50%; border: 1px solid var(--line); background: var(--cream); display: grid; place-items: center; cursor: pointer; color: var(--olive-deep); }
+.icon-btn .ico { width: 18px; height: 18px; }
+.journey { display: flex; gap: 4px; }
+.seg { position: relative; flex: var(--w) 1 0; display: grid; gap: 4px; }
+.seg-name { font: 600 9.5px/1 var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; overflow: hidden; }
+.seg.is-now .seg-name { color: var(--olive-deep); }
+.seg-track { height: 6px; border-radius: 3px; background: var(--cream-2); overflow: hidden; }
+.seg-fill { display: block; height: 100%; width: 0; background: var(--olive); border-radius: 3px; }
+.seg.is-now .seg-fill { background: var(--gold); }
+.hud-pills { display: flex; gap: 6px; flex-wrap: wrap; min-height: 26px; }
+.pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px 2px 6px; border-radius: 999px; background: var(--cream); border: 1px solid var(--line); font: 500 12.5px/1.45 var(--font-body); color: var(--ink); }
+.pill b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.pill .ico { width: 16px; height: 16px; }
+.pill.is-pop { animation: pop .32s ease-out; }
+.c-ragi { color: var(--ragi); } .c-millet { color: var(--millet); } .c-gold { color: var(--gold); } .c-olive { color: var(--olive); }
+
+/* ---------- Play area ---------- */
+.playfield { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+.scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; transition: opacity .3s ease; }
+.scene.is-hidden { opacity: 0; }
+.fx { position: absolute; inset: 0; pointer-events: none; z-index: 25; overflow: hidden; }
+.toast { position: absolute; left: 50%; top: 12px; z-index: 40; max-width: 88%; transform: translate(-50%, -8px); opacity: 0; pointer-events: none; padding: 9px 14px 7px; border-radius: 12px; background: var(--olive-deep); color: var(--paper); font: 600 14px/1.3 var(--font-body); text-align: center; transition: opacity .2s, transform .2s; }
+.toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+.game[data-stage="bake"] .toast { top: auto; bottom: 22px; }
+
+/* ---------- Title ---------- */
+.title { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; justify-content: flex-end; }
+.title-card { display: grid; gap: 13px; max-height: 80%; overflow-y: auto; touch-action: pan-y; padding: 20px 20px 18px; background: var(--paper); border-radius: 24px 24px 0 0; box-shadow: 0 -12px 30px rgba(42, 61, 28, .14); }
+.brand { display: flex; align-items: center; gap: 8px; }
+.brand-name { display: inline-flex; align-items: center; gap: 5px; font: 400 21px/1 var(--font-display); color: var(--olive-deep); }
+.brand-name .ico { width: 18px; height: 18px; color: var(--olive); margin-bottom: 3px; }
+.brand-by { font: 700 10.5px/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--olive); }
+.demo-badge { margin-left: auto; font: 700 10px/1 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--paper); background: var(--qc); padding: 5px 8px 4px; border-radius: 999px; }
+.title-h { margin: 0; font: 400 clamp(34px, 11vw, 46px)/.98 var(--font-display); color: var(--olive-deep); text-wrap: balance; }
+.title-p { margin: 0; max-width: 34ch; font: 400 15.5px/1.45 var(--font-body); color: var(--ink-2); }
+.route { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0; padding: 0; list-style: none; }
+.route li { display: grid; justify-items: center; gap: 2px; padding: 9px 2px 7px; border-radius: 12px; background: var(--cream); text-align: center; }
+.route .ico { width: 24px; height: 24px; }
+.route b { font: 700 13px/1.15 var(--font-body); color: var(--olive-deep); }
+.route span { font: 500 11.5px/1 var(--font-body); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.cam-opt { display: flex; align-items: flex-start; gap: 11px; cursor: pointer; font: 500 14px/1.35 var(--font-body); color: var(--ink); }
+.cam-opt small { display: block; font-size: 12px; color: var(--ink-2); }
+.switch { appearance: none; -webkit-appearance: none; flex: none; position: relative; width: 42px; height: 24px; margin: 1px 0 0; border-radius: 999px; background: var(--cream-2); border: 1px solid var(--line); cursor: pointer; transition: background .2s; }
+.switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--paper); box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .2s; }
+.switch:checked { background: var(--olive); }
+.switch:checked::after { transform: translateX(18px); }
+.start-wrap { display: grid; gap: 8px; }
+.start-note { margin: 0; min-height: 1.3em; text-align: center; font: 500 12.5px/1.3 var(--font-body); color: var(--ink-2); }
+.link-btn { border: 0; background: none; padding: 4px 6px; font: 700 13px/1 var(--font-body); color: var(--olive); text-decoration: underline; cursor: pointer; }
+
+/* ---------- Buttons ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 14px 22px 12px; border: 0; border-radius: 999px; cursor: pointer; font: 700 16px/1 var(--font-body); transition: transform .1s ease, box-shadow .1s ease, background .2s; }
+.btn:active { transform: translateY(3px); }
+.btn-primary { background: var(--olive); color: var(--paper); box-shadow: 0 5px 0 var(--olive-deep); }
+.btn-primary:active { box-shadow: 0 2px 0 var(--olive-deep); }
+.btn-offer { background: linear-gradient(180deg, var(--gold-soft), var(--gold)); color: var(--olive-deep); box-shadow: 0 5px 0 #96701F; font-size: 18px; min-height: 58px; }
+.btn-offer:active { box-shadow: 0 2px 0 #96701F; }
+.btn-ghost { background: transparent; color: var(--olive-deep); border: 2px solid rgba(42, 61, 28, .28); min-height: 48px; }
+.btn-small { min-height: 40px; padding: 10px 14px 8px; font-size: 14px; }
+.btn-start { width: 100%; font-size: 18px; min-height: 58px; }
+
+/* ---------- Stage intro ---------- */
+.intro { position: absolute; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px; background: rgba(42, 61, 28, .45); opacity: 0; transition: opacity .22s ease; }
+.intro.is-in { opacity: 1; }
+.intro-card { width: min(100%, 320px); padding: 22px 20px 16px; border-radius: 22px; background: var(--paper); text-align: center; box-shadow: 0 16px 40px rgba(20, 30, 12, .3); transform: translateY(14px) scale(.98); transition: transform .28s cubic-bezier(.2, .8, .2, 1); }
+.intro.is-in .intro-card { transform: none; }
+.intro-kicker { font: 700 11px/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--olive); }
+.intro-title { margin: 10px 0 8px; font: 400 40px/1 var(--font-display); color: var(--olive-deep); }
+.intro-time { color: var(--gold); }
+.intro-goal { margin: 0; font: 500 15px/1.45 var(--font-body); color: var(--ink); text-wrap: balance; }
+.intro-carry { margin: 10px 0 0; font: 700 16px/1.3 var(--font-hand); color: var(--ragi); text-wrap: balance; }
+.intro-bar { height: 4px; margin-top: 16px; border-radius: 4px; background: var(--cream-2); overflow: hidden; }
+.intro-bar span { display: block; height: 100%; width: 0; background: var(--olive); }
+.intro.is-in .intro-bar span { animation: fillbar var(--intro-ms, 2000ms) linear forwards; }
+
+/* ---------- Bake (kitchen) ---------- */
+.bake {
+  position: absolute; inset: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px 14px 14px;
+  background:
+    repeating-linear-gradient(0deg, rgba(78, 107, 46, .07) 0 1px, transparent 1px 36px),
+    repeating-linear-gradient(90deg, rgba(78, 107, 46, .07) 0 1px, transparent 1px 36px),
+    var(--cream);
+}
+.bake-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.bake-title { margin: 0; font: 400 21px/1 var(--font-display); color: var(--olive-deep); white-space: nowrap; }
+.bake-cap { margin: 0; font: 700 14px/1.2 var(--font-hand); color: var(--ragi); text-align: right; }
+.orders { display: flex; gap: 8px; min-height: 86px; }
+.ticket { position: relative; flex: 1 1 0; min-width: 0; display: grid; align-content: start; gap: 1px; padding: 9px 8px 8px; border-radius: 4px 4px 2px 2px; background: var(--paper); border-top: 5px solid var(--olive-soft); box-shadow: 0 3px 8px rgba(42, 61, 28, .12); transform: rotate(var(--tilt, 0deg)); transition: transform .25s, box-shadow .25s; }
+.ticket.is-active { flex-grow: 1.4; border-top-color: var(--gold); box-shadow: 0 0 0 2px var(--gold), 0 6px 14px rgba(42, 61, 28, .18); transform: rotate(0deg) translateY(-2px); }
+.t-tag { font: 700 9.5px/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
+.ticket.is-active .t-tag { color: #8C6716; }
+.t-name { font: 700 14px/1.1 var(--font-hand); color: var(--olive-deep); overflow-wrap: anywhere; }
+.ticket:not(.is-active) .t-name { font-size: 13px; }
+.t-qty { font: 700 22px/1 var(--font-hand); color: var(--ragi); }
+.t-need { font: 500 10.5px/1.25 var(--font-body); color: var(--ink-2); }
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0; padding: 0; list-style: none; }
+.steps li { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 4px 6px; border-radius: 10px; background: rgba(255, 250, 238, .7); border: 1px solid var(--line); font: 600 13px/1 var(--font-body); color: var(--ink-2); transition: background .2s, color .2s; }
+.steps .n { display: grid; place-items: center; width: 19px; height: 19px; border-radius: 50%; background: var(--cream-2); font-size: 11px; font-weight: 700; padding-top: 1px; }
+.steps li.is-active { background: var(--gold-soft); border-color: var(--gold); color: var(--olive-deep); }
+.steps li.is-active .n { background: var(--olive-deep); color: var(--paper); }
+.steps li.is-done { background: var(--olive); border-color: var(--olive); color: var(--paper); }
+.steps li.is-done .n { background: var(--paper); color: var(--olive); }
+.bench {
+  position: relative; flex: 1 1 auto; min-height: 0; display: grid; place-items: center; padding: 12px; border-radius: 20px; overflow: hidden;
+  background: repeating-linear-gradient(90deg, rgba(122, 82, 40, .07) 0 2px, transparent 2px 23px), linear-gradient(180deg, #E8D6AE, #DCC596);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .55), 0 6px 18px rgba(42, 61, 28, .14);
+}
+.station { display: grid; justify-items: center; align-content: center; gap: 12px; width: 100%; text-align: center; }
+.station-hint { margin: 0; max-width: 30ch; font: 600 14.5px/1.35 var(--font-body); color: var(--olive-deep); text-wrap: balance; }
+.mill-btn { border: 0; background: none; padding: 6px; border-radius: 50%; cursor: pointer; }
+.millstone {
+  --turn: 0deg; display: block; position: relative; width: min(150px, 25vh); aspect-ratio: 1; max-width: 100%; border-radius: 50%;
+  background: repeating-conic-gradient(from 10deg, rgba(60, 56, 46, .16) 0 4deg, transparent 4deg 22deg), radial-gradient(circle, #6E695C 0 11%, #B8B19E 12% 62%, #A29B88 63% 100%);
+  box-shadow: inset 0 -6px 0 rgba(0, 0, 0, .12), 0 7px 0 #7C7667, 0 12px 18px rgba(42, 61, 28, .2);
+  transform: rotate(var(--turn)); transition: transform .28s cubic-bezier(.2, .8, .2, 1);
+}
+.millstone::after { content: ""; position: absolute; left: 50%; top: 8%; width: 9%; height: 9%; border-radius: 50%; background: #5E594D; transform: translateX(-50%); }
+.tap-dots { display: flex; gap: 8px; }
+.tap-dots i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--olive); }
+.tap-dots i.on { background: var(--olive); }
+.bowl { position: relative; width: min(180px, 70%); aspect-ratio: 9 / 5; }
+.bowl::before { content: ""; position: absolute; inset: 0 0 auto; height: 36%; border-radius: 50%; background: #3F5A23; }
+.bowl-body { position: absolute; inset: 18% 0 0; border-radius: 0 0 50% 50% / 0 0 100% 100%; background: linear-gradient(180deg, #5C7C37, var(--olive)); box-shadow: inset 0 -8px 0 rgba(0, 0, 0, .12); }
+.dough { position: absolute; left: 14%; right: 14%; top: 6%; height: 26%; border-radius: 50%; background: radial-gradient(circle at 40% 40%, #B58763, #8D5D3E); }
+.bowl.is-stirring .dough { animation: stir .55s ease-in-out; }
+.chips { display: flex; gap: 8px; width: 100%; }
+.chip { flex: 1 1 0; min-width: 0; min-height: 56px; display: grid; justify-items: center; align-content: center; gap: 4px; padding: 8px 4px 6px; border-radius: 14px; border: 2px solid rgba(42, 61, 28, .18); background: var(--paper); cursor: pointer; font: 700 13.5px/1.1 var(--font-body); color: var(--olive-deep); box-shadow: 0 3px 0 rgba(42, 61, 28, .15); }
+.chip:active { transform: translateY(2px); box-shadow: none; }
+.ing { display: block; width: 26px; height: 16px; border-radius: 8px; }
+.ing-millet { background: radial-gradient(circle at 25% 50%, #B98328 0 2px, transparent 2.5px), radial-gradient(circle at 55% 40%, #B98328 0 2px, transparent 2.5px), radial-gradient(circle at 80% 55%, #B98328 0 2px, transparent 2.5px), var(--millet); }
+.ing-oats { background: radial-gradient(ellipse at 30% 50%, #F6E7C4 0 30%, transparent 32%), radial-gradient(ellipse at 70% 50%, #F6E7C4 0 30%, transparent 32%), #D9C49A; }
+.ing-almonds { background: radial-gradient(ellipse at 30% 50%, #9B6238 0 34%, transparent 36%), radial-gradient(ellipse at 72% 50%, #8A5530 0 34%, transparent 36%), #E3CFAE; }
+.ing-choco { background: radial-gradient(circle at 25% 50%, #3A2214 0 3px, transparent 3.5px), radial-gradient(circle at 60% 40%, #3A2214 0 3px, transparent 3.5px), radial-gradient(circle at 85% 60%, #3A2214 0 2.5px, transparent 3px), #E3CFAE; }
+.ing-seeds { background: radial-gradient(ellipse at 22% 50%, #2E2A22 0 2px, transparent 2.5px), radial-gradient(ellipse at 48% 40%, #F3EBD7 0 2px, transparent 2.5px), radial-gradient(ellipse at 74% 58%, #2E2A22 0 2px, transparent 2.5px), #B9A882; }
+.oven { width: min(210px, 80%); aspect-ratio: 3 / 2; padding: 12px; border-radius: 22px; background: linear-gradient(180deg, #3F4E33, var(--olive-deep)); box-shadow: 0 8px 0 #1E2C14, 0 14px 22px rgba(42, 61, 28, .25); }
+.oven-window { height: 100%; display: grid; place-items: center; border-radius: 14px; background: radial-gradient(circle at 50% 62%, #F2B866 0 22%, #B4622C 64%, #6A3318 100%); box-shadow: inset 0 0 0 4px rgba(255, 255, 255, .08); transition: box-shadow .2s; }
+.bake-ui.in-zone .oven-window { box-shadow: inset 0 0 0 4px var(--gold-soft), 0 0 22px rgba(240, 211, 138, .7); }
+.bakebar { --p: 0%; --z0: 62%; --z1: 79%; position: relative; width: min(250px, 92%); height: 20px; border-radius: 10px; background: linear-gradient(90deg, #DCC7A2 0 var(--z0), var(--gold) var(--z0) var(--z1), #4A2E1B var(--z1) 100%); box-shadow: inset 0 2px 3px rgba(0, 0, 0, .18); }
+.bake-marker { position: absolute; top: -6px; left: var(--p); width: 8px; height: 32px; margin-left: -4px; border-radius: 4px; background: var(--paper); border: 2px solid var(--olive-deep); box-shadow: 0 2px 4px rgba(0, 0, 0, .25); }
+.bake-labels { display: flex; justify-content: space-between; width: min(250px, 92%); font: 700 10px/1 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
+.bake-labels .g { color: #8C6716; }
+.btn.is-hot { background: var(--gold); color: var(--olive-deep); box-shadow: 0 5px 0 #96701F; animation: throb .6s ease-in-out infinite alternate; }
+.pack-btn { border: 0; background: none; padding: 6px; cursor: pointer; border-radius: 18px; }
+.pouch { position: relative; display: grid; justify-items: center; align-content: start; gap: 2px; width: min(128px, 30vh); aspect-ratio: 4 / 5; padding: 18% 8% 0; border-radius: 12px 12px 16px 16px; background: linear-gradient(160deg, var(--paper) 0 58%, var(--olive) 58% 100%); box-shadow: inset 0 0 0 2px rgba(42, 61, 28, .12), 0 8px 18px rgba(42, 61, 28, .22); transition: transform .25s; }
+.pouch::before { content: ""; position: absolute; left: 8%; right: 8%; top: 7%; height: 3px; border-radius: 2px; background: repeating-linear-gradient(90deg, rgba(42, 61, 28, .35) 0 4px, transparent 4px 7px); }
+.pouch .ico { width: 18px; height: 18px; color: var(--olive); }
+.pouch-name { font: 400 18px/1 var(--font-display); color: var(--olive-deep); }
+.pouch-by { font: 700 7.5px/1 var(--font-body); letter-spacing: .16em; color: var(--olive); }
+.pouch-var { margin-top: 4px; font: 600 10px/1.15 var(--font-body); color: var(--olive-deep); text-align: center; }
+.pouch-seal { position: absolute; inset: auto 0 12% 0; margin: auto; width: 54px; height: 54px; display: grid; place-items: center; border-radius: 50%; background: var(--gold); color: var(--olive-deep); font: 700 10px/1.1 var(--font-body); letter-spacing: .08em; text-align: center; transform: scale(0) rotate(-20deg); transition: transform .3s cubic-bezier(.2, 1.6, .4, 1); }
+.pouch.is-sealed { transform: scale(1.06); }
+.pouch.is-sealed .pouch-seal { transform: scale(1) rotate(-10deg); }
+.empty-msg { margin: 0; max-width: 28ch; font: 400 24px/1.15 var(--font-display); color: var(--olive-deep); text-wrap: balance; }
+.empty-bonus { margin: 0; font: 700 18px/1 var(--font-hand); color: var(--ragi); }
+
+/* ---------- Quality control ---------- */
+.qc { position: absolute; inset: 0; z-index: 30; display: grid; place-items: center; padding: 20px; background: rgba(42, 61, 28, .38); }
+.qc-card { width: min(100%, 310px); padding: 20px 18px 18px; border-radius: 20px; background: var(--paper); text-align: center; box-shadow: 0 16px 40px rgba(20, 30, 12, .3); animation: qcIn .26s cubic-bezier(.2, 1.3, .4, 1); }
+.qc-stamp { display: block; width: 104px; height: 104px; margin: 0 auto 8px; color: var(--qc); transform: rotate(-12deg); animation: stamp .3s cubic-bezier(.2, 1.4, .4, 1); }
+.qc-title { margin: 0; font: 400 22px/1.15 var(--font-display); color: var(--olive-deep); text-wrap: balance; }
+.qc-reason { margin: 8px 0 0; font: 500 14px/1.4 var(--font-body); color: var(--ink-2); text-wrap: balance; }
+
+/* ---------- First bite ---------- */
+.bite { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 18px; text-align: center; background: radial-gradient(circle at 50% 42%, var(--paper) 0 30%, var(--cream) 62%, var(--cream-2)); }
+.bite-title { margin: 0; font: 400 30px/1.05 var(--font-display); color: var(--olive-deep); text-wrap: balance; }
+.bite-sub { margin: 0; font: 600 15.5px/1.35 var(--font-body); color: var(--ink); }
+.bite-stage { --p: 0; position: relative; width: min(250px, 38vh); aspect-ratio: 1; }
+.ring { position: absolute; inset: -9px; width: calc(100% + 18px); height: calc(100% + 18px); transform: rotate(-90deg); pointer-events: none; }
+.ring circle { fill: none; stroke-width: 5; }
+.ring .track { stroke: var(--cream-2); }
+.ring .fill { stroke: var(--gold); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: calc(100 - var(--p) * 100); }
+.cam { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; background: var(--olive-deep); box-shadow: 0 0 0 5px var(--paper); cursor: pointer; }
+.cam video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+.face-guide { position: absolute; left: 21%; right: 21%; top: 9%; bottom: 8%; border: 2px dashed rgba(255, 250, 238, .85); border-radius: 50%; }
+.cam-cookie { position: absolute; left: 50%; top: 66%; width: 30%; aspect-ratio: 1; margin-left: -15%; }
+.tap-bite { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 10px; border: 0; background: none; border-radius: 50%; cursor: pointer; padding: 0; }
+.big-cookie { width: 72%; aspect-ratio: 1; animation: bob 1.4s ease-in-out infinite alternate; }
+.tap-label { font: 700 13px/1 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--olive); }
+.bite-wait { position: absolute; inset: 0; display: grid; place-items: center; font: 600 14px/1.3 var(--font-body); color: var(--ink-2); }
+.cookie {
+  --cookie: #8F5530; border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255, 238, 205, .42) 0 10%, transparent 28%),
+    radial-gradient(circle at 26% 62%, #3E1E10 0 3%, transparent 4%),
+    radial-gradient(circle at 58% 32%, #3E1E10 0 2.6%, transparent 3.6%),
+    radial-gradient(circle at 70% 64%, #3E1E10 0 3%, transparent 4%),
+    radial-gradient(circle at 44% 80%, #4A2614 0 2.4%, transparent 3.4%),
+    radial-gradient(circle at 80% 42%, #E8C98C 0 3%, transparent 4%),
+    radial-gradient(circle at 38% 46%, #E8C98C 0 2.5%, transparent 3.5%),
+    radial-gradient(circle at 62% 50%, #E8C98C 0 2%, transparent 3%),
+    var(--cookie);
+  box-shadow: inset 0 -6px 10px rgba(50, 24, 8, .3), inset 0 4px 6px rgba(255, 238, 205, .25), 0 8px 16px rgba(42, 61, 28, .25);
+}
+.oven-cookie { width: 42%; aspect-ratio: 1; transition: transform .2s; }
+.oven-cookie.is-perfect { transform: scale(1.12); }
+.is-bitten {
+  -webkit-mask: radial-gradient(circle at 90% 12%, transparent 0 25%, #000 26%), radial-gradient(circle at 66% 0%, transparent 0 17%, #000 18%);
+  -webkit-mask-composite: source-in;
+  mask: radial-gradient(circle at 90% 12%, transparent 0 25%, #000 26%), radial-gradient(circle at 66% 0%, transparent 0 17%, #000 18%);
+  mask-composite: intersect;
+}
+.crunch-word { position: absolute; left: 50%; top: 8%; transform: translateX(-50%) scale(.6) rotate(-6deg); opacity: 0; font: 400 34px/1 var(--font-display); color: var(--ragi); pointer-events: none; z-index: 3; }
+.crunch-word.is-on { animation: crunchword .9s cubic-bezier(.2, 1.3, .4, 1) forwards; }
+.bite-note { margin: 0; max-width: 32ch; font: 500 12.5px/1.4 var(--font-body); color: var(--ink-2); text-wrap: balance; }
+
+/* ---------- End card ---------- */
+.end { position: absolute; inset: 0; z-index: 12; overflow-y: auto; touch-action: pan-y; background: radial-gradient(circle at 50% 0%, var(--paper), var(--cream) 55%); }
+.end-inner { display: grid; gap: 14px; padding: 22px 18px 24px; }
+.end-title { margin: 0; font: 400 32px/1 var(--font-display); color: var(--olive-deep); text-wrap: balance; }
+.label-card { position: relative; padding: 14px 96px 14px 14px; border-radius: 14px; background: var(--paper); border: 1.5px dashed rgba(42, 61, 28, .38); }
+.label-kicker { font: 700 10px/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--olive); }
+.label-line { margin: 7px 0 8px; font: 700 17px/1.3 var(--font-body); color: var(--olive-deep); }
+.label-route { display: grid; gap: 1px; font: 400 15px/1.3 var(--font-hand); color: var(--ragi); }
+.stamp { position: absolute; right: 12px; top: 12px; width: 70px; height: 82px; display: grid; place-content: center; gap: 3px; padding: 6px 4px; border-radius: 4px; background: var(--olive); color: var(--paper); text-align: center; transform: rotate(4deg); outline: 2px dashed rgba(255, 250, 238, .75); outline-offset: -6px; }
+.stamp b { font: 400 17px/1 var(--font-display); letter-spacing: .04em; }
+.stamp span { font: 600 15px/1 "Noto Sans Kannada", "Kannada Sangam MN", "Nirmala UI", "Tunga", sans-serif; }
+.stamp small { font: 700 7px/1 var(--font-body); letter-spacing: .14em; }
+.rating-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.rating { display: flex; gap: 4px; }
+.rating svg { width: 34px; height: 34px; }
+.rating .on { color: var(--gold); }
+.rating .off { color: var(--cream-2); }
+.end-score { margin: 0; text-align: right; font: 500 13px/1.2 var(--font-body); color: var(--ink-2); }
+.end-score b { display: block; font: 700 26px/1 var(--font-body); color: var(--olive-deep); font-variant-numeric: tabular-nums; }
+.stats { display: grid; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.stats li { display: grid; grid-template-columns: 74px 1fr; gap: 10px; align-items: baseline; padding: 9px 0 8px; border-bottom: 1px solid var(--line); }
+.stats span { font: 700 10.5px/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--olive); }
+.stats b { min-width: 0; font: 600 14.5px/1.35 var(--font-body); color: var(--ink); }
+.end-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ---------- Sheet ---------- */
+.sheet-backdrop { position: absolute; inset: 0; z-index: 50; display: flex; align-items: flex-end; background: rgba(20, 30, 12, .5); }
+.sheet { width: 100%; display: grid; gap: 12px; padding: 20px 18px calc(18px + env(safe-area-inset-bottom, 0px)); border-radius: 22px 22px 0 0; background: var(--paper); box-shadow: 0 -10px 30px rgba(20, 30, 12, .25); animation: sheetIn .25s ease-out; }
+.sheet h3 { margin: 0; font: 400 24px/1.1 var(--font-display); color: var(--olive-deep); }
+.sheet-p { margin: 0; font: 500 14.5px/1.45 var(--font-body); color: var(--ink); }
+.sheet-fine { margin: 0; font: 500 12px/1.4 var(--font-body); color: var(--ink-2); }
+.offer { display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 14px; background: var(--cream); }
+.offer .pouch { width: 58px; padding-top: 16%; border-radius: 8px 8px 10px 10px; }
+.offer .pouch .pouch-name { font-size: 9px; }
+.offer .pouch .ico { width: 10px; height: 10px; }
+.offer-name { margin: 0; font: 700 16px/1.25 var(--font-body); color: var(--olive-deep); }
+.offer-meta { margin: 2px 0 0; font: 600 14px/1.3 var(--font-body); color: var(--ragi); }
+.code-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.offer-code { flex: 1 1 auto; padding: 12px 14px 10px; border-radius: 12px; border: 2px dashed var(--gold); background: var(--paper); font: 700 18px/1 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; letter-spacing: .08em; color: var(--olive-deep); text-align: center; -webkit-user-select: all; user-select: all; }
+.share-text { width: 100%; min-height: 96px; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--cream); color: var(--ink); font: 500 14px/1.4 var(--font-body); resize: none; -webkit-user-select: text; user-select: text; }
+
+/* ---------- DOM particles ---------- */
+.bit { position: absolute; width: 7px; height: 7px; border-radius: 2px; animation: bit .85s cubic-bezier(.2, .7, .3, 1) forwards; }
+.flour { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: #EDE2CC; animation: bit .6s ease-out forwards; }
+.crumb { position: absolute; width: 7px; height: 6px; border-radius: 40%; background: #7C4727; animation: bit .95s cubic-bezier(.2, .6, .4, 1) forwards; }
+
+.rotate { display: none; }
+@media (orientation: landscape) and (max-height: 500px) {
+  .rotate { position: absolute; inset: 0; z-index: 99; display: grid; place-items: center; padding: 20px; background: var(--paper); text-align: center; font: 600 16px/1.4 var(--font-body); color: var(--olive-deep); }
+}
+
+@keyframes pulse { to { opacity: .55; } }
+@keyframes pop { 50% { transform: scale(1.12); } }
+@keyframes fillbar { to { width: 100%; } }
+@keyframes stir { 0% { transform: rotate(0) scale(1); } 50% { transform: rotate(14deg) scale(1.08, .92); } 100% { transform: rotate(0) scale(1); } }
+@keyframes throb { to { transform: scale(1.04); } }
+@keyframes qcIn { from { transform: scale(.9); opacity: 0; } }
+@keyframes stamp { from { transform: rotate(-30deg) scale(1.6); opacity: 0; } }
+@keyframes bob { to { transform: translateY(-6px) rotate(3deg); } }
+@keyframes crunchword { 0% { opacity: 0; transform: translateX(-50%) scale(.6) rotate(-6deg); } 30% { opacity: 1; transform: translateX(-50%) scale(1.1) rotate(-6deg); } 100% { opacity: 0; transform: translateX(-50%) translateY(-24px) scale(1) rotate(-6deg); } }
+@keyframes bit { to { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; } }
+@keyframes sheetIn { from { transform: translateY(30px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .intro.is-in .intro-bar span { animation-duration: var(--intro-ms, 2000ms) !important; }
+}
+</style>
+</head>
+<body>
+<svg class="defs" aria-hidden="true" focusable="false">
+  <symbol id="i-ragi" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="12" cy="4.6" r="2.1"/><circle cx="8.3" cy="6.4" r="1.9"/><circle cx="15.7" cy="6.4" r="1.9"/><circle cx="6.5" cy="9.7" r="1.7"/><circle cx="17.5" cy="9.7" r="1.7"/><circle cx="12" cy="8.4" r="1.9"/><circle cx="9.6" cy="11.1" r="1.6"/><circle cx="14.4" cy="11.1" r="1.6"/></g><path d="M12 12.5v9" stroke="#6F8040" stroke-width="1.8" stroke-linecap="round" fill="none"/></symbol>
+  <symbol id="i-millet" viewBox="0 0 24 24"><rect x="8.5" y="2.5" width="7" height="14" rx="3.5" fill="currentColor"/><g fill="rgba(110,70,20,.55)"><circle cx="11" cy="6" r=".9"/><circle cx="13.4" cy="7.7" r=".9"/><circle cx="11" cy="9.6" r=".9"/><circle cx="13.4" cy="11.4" r=".9"/><circle cx="11" cy="13.2" r=".9"/></g><path d="M12 16.5v5" stroke="#6F8040" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z"/></symbol>
+  <symbol id="i-pack" viewBox="0 0 24 24"><path fill="currentColor" d="M6 3h12l1 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6z"/><rect x="7.5" y="9" width="9" height="7" rx="1.5" fill="#FFFAEE"/><path d="M6 6h12" stroke="#FFFAEE" stroke-width="1.2"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path fill="currentColor" d="M2 6h11v9H2zM13 9h4l3 3v3h-7z"/><circle cx="6" cy="17" r="2" fill="currentColor"/><circle cx="17" cy="17" r="2" fill="currentColor"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M7.5 12.5l3 3 6-6.5" stroke="#FFFAEE" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path fill="currentColor" d="M20 3C11 3 5 8 5 15c0 1.6.4 3 1 4.2C8 13 12 10 16 8c-3.5 3-6.6 6.8-8.4 12 1 .6 2.2 1 3.4 1C17 21 21 14 20 3z"/></symbol>
+  <symbol id="i-sound" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 9.5l5 5m0-5l-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-oven" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3" fill="currentColor"/><rect x="6" y="9" width="12" height="8" rx="1.5" fill="#F0D38A"/><circle cx="7" cy="6.5" r="1" fill="#FFFAEE"/><circle cx="10" cy="6.5" r="1" fill="#FFFAEE"/></symbol>
+  <symbol id="i-cookie" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10 3.5 3.5 0 0 1-3.6-3.4A3.5 3.5 0 0 1 14.6 5 3 3 0 0 1 12 2z"/><circle cx="8" cy="11" r="1.3" fill="#FFFAEE"/><circle cx="12" cy="16" r="1.3" fill="#FFFAEE"/><circle cx="16" cy="14" r="1.1" fill="#FFFAEE"/></symbol>
+  <symbol id="i-qc" viewBox="0 0 120 120">
+    <path id="qcArc" d="M60 60 m-43 0 a43 43 0 1 1 86 0 a43 43 0 1 1 -86 0" fill="none"/>
+    <circle cx="60" cy="60" r="56" fill="none" stroke="currentColor" stroke-width="3"/>
+    <circle cx="60" cy="60" r="33" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    <text font-family="Hind, Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="1.6" fill="currentColor"><textPath href="#qcArc">IBP QUALITY CONTROL · NUTRIELLE KITCHEN ·</textPath></text>
+    <text x="60" y="65" text-anchor="middle" font-family="Hind, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="1" fill="currentColor">REJECTED</text>
+  </symbol>
+</svg>
+
+<main class="game" id="game" aria-label="Farm to First Bite, a 60-second Nutrielle game">
+  <header class="hud" id="hud" hidden>
+    <div class="hud-top">
+      <div class="stage-chip"><span class="stage-num" id="stageNum">1</span><span id="stageName">Harvest</span></div>
+      <div class="hud-stat" id="stageTimeWrap"><span class="hud-label">Stage</span><span class="hud-val" id="stageTime">15</span></div>
+      <div class="hud-stat"><span class="hud-label">Total</span><span class="hud-val" id="totalTime">1:00</span></div>
+      <div class="hud-stat"><span class="hud-label">Score</span><span class="hud-val" id="score">0</span></div>
+      <button class="icon-btn" id="muteBtn" type="button" aria-label="Mute sound" aria-pressed="false"><svg class="ico"><use href="#i-sound"/></svg></button>
+    </div>
+    <div class="journey" aria-hidden="true">
+      <div class="seg" style="--w:15"><span class="seg-name">Farm</span><span class="seg-track"><span class="seg-fill"></span></span></div>
+      <div class="seg" style="--w:30"><span class="seg-name">Kitchen</span><span class="seg-track"><span class="seg-fill"></span></span></div>
+      <div class="seg" style="--w:10"><span class="seg-name">Road</span><span class="seg-track"><span class="seg-fill"></span></span></div>
+      <div class="seg" style="--w:5"><span class="seg-name">You</span><span class="seg-track"><span class="seg-fill"></span></span></div>
+    </div>
+    <div class="hud-pills">
+      <span class="pill" id="pillRagi"><svg class="ico c-ragi"><use href="#i-ragi"/></svg><b id="invRagi">0</b> ragi</span>
+      <span class="pill" id="pillMillet"><svg class="ico c-millet"><use href="#i-millet"/></svg><b id="invMillet">0</b> millet</span>
+      <span class="pill" id="pillStars" hidden><svg class="ico c-gold"><use href="#i-star"/></svg><b id="starCount">0</b> orders</span>
+      <span class="pill" id="pillPacks" hidden><svg class="ico c-olive"><use href="#i-pack"/></svg><b id="packCount">0</b> packs on board</span>
+      <span class="pill" id="pillDrops" hidden><svg class="ico c-olive"><use href="#i-check"/></svg><b id="dropCount">0</b> delivered</span>
+    </div>
+  </header>
+
+  <div class="playfield" id="playfield">
+    <canvas class="scene" id="scene" role="img" aria-label="A partner farm in Karnataka"></canvas>
+
+    <section class="bake" id="bake" hidden aria-label="Nutrielle Kitchen">
+      <div class="bake-head">
+        <h2 class="bake-title">Nutrielle Kitchen</h2>
+        <p class="bake-cap" id="bakeCap"></p>
+      </div>
+      <div class="orders" id="orders" aria-label="Orders"></div>
+      <ol class="steps" aria-label="Stations">
+        <li><span class="n">1</span>Mill</li>
+        <li><span class="n">2</span>Mix</li>
+        <li><span class="n">3</span>Bake</li>
+        <li><span class="n">4</span>Pack</li>
+      </ol>
+      <div class="bench" id="bench">
+        <div class="station" id="stMill">
+          <button class="mill-btn" id="millBtn" type="button" aria-label="Grind ragi with the millstone"><span class="millstone" id="millstone"></span></button>
+          <div class="tap-dots" id="millDots" aria-hidden="true"><i></i><i></i><i></i></div>
+          <p class="station-hint" id="millHint"></p>
+        </div>
+        <div class="station" id="stMix" hidden>
+          <div class="bowl" id="bowl" aria-hidden="true"><span class="bowl-body"></span><span class="dough"></span></div>
+          <p class="station-hint" id="mixHint"></p>
+          <div class="chips" id="chips"></div>
+        </div>
+        <div class="station bake-ui" id="stBake" hidden>
+          <div class="oven" aria-hidden="true"><div class="oven-window"><span class="cookie oven-cookie" id="ovenCookie"></span></div></div>
+          <div class="bakebar" id="bakebar" aria-hidden="true"><span class="bake-marker"></span></div>
+          <div class="bake-labels" aria-hidden="true"><span>Raw</span><span class="g">Golden</span><span>Burnt</span></div>
+          <button class="btn btn-primary" id="bakeBtn" type="button">Put in oven</button>
+        </div>
+        <div class="station" id="stPack" hidden>
+          <button class="pack-btn" id="packBtn" type="button" aria-label="Pack and seal the cookies">
+            <span class="pouch" id="pouch">
+              <svg class="ico"><use href="#i-leaf"/></svg>
+              <span class="pouch-name">Nutrielle</span>
+              <span class="pouch-by">BY IBP</span>
+              <span class="pouch-var">Ragi &amp; Millet</span>
+              <span class="pouch-seal">SEALED<br>&amp; QC'D</span>
+            </span>
+          </button>
+          <p class="station-hint" id="packHint"></p>
+        </div>
+        <div class="station" id="stEmpty" hidden>
+          <p class="empty-msg" id="emptyMsg"></p>
+          <p class="empty-bonus" id="emptyBonus"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="bite" id="bite" hidden aria-label="First bite">
+      <h2 class="bite-title">Your pack has arrived</h2>
+      <p class="bite-sub" id="biteSub">Open wide for the first bite</p>
+      <div class="bite-stage" id="biteStage">
+        <div class="cam" id="cam" hidden>
+          <video id="video" playsinline muted autoplay></video>
+          <div class="face-guide" aria-hidden="true"></div>
+          <span class="cookie cam-cookie" id="camCookie" aria-hidden="true"></span>
+        </div>
+        <button class="tap-bite" id="tapBite" type="button" hidden aria-label="Tap to take a bite">
+          <span class="cookie big-cookie" id="bigCookie"></span>
+          <span class="tap-label">Tap to take a bite</span>
+        </button>
+        <div class="bite-wait" id="biteWait">Starting your camera…</div>
+        <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="56" pathLength="100"/><circle class="fill" cx="60" cy="60" r="56" pathLength="100"/></svg>
+        <span class="crunch-word" id="crunchWord" aria-hidden="true">Crunch!</span>
+      </div>
+      <p class="bite-note" id="biteNote">Your camera stays on your phone. Nothing is recorded or uploaded.</p>
+    </section>
+
+    <section class="end" id="end" hidden aria-label="Your scorecard">
+      <div class="end-inner">
+        <div class="brand"><span class="brand-name"><svg class="ico"><use href="#i-leaf"/></svg>Nutrielle</span><span class="brand-by">by IBP</span></div>
+        <h2 class="end-title">Your cookie has an address</h2>
+        <div class="label-card">
+          <div class="label-kicker">Traced from farm to first bite</div>
+          <p class="label-line" id="endLine">Ragi &amp; Millet · ragi from Karnataka · by IBP</p>
+          <div class="label-route"><span>From: a partner farm, Karnataka</span><span>To: you</span></div>
+          <div class="stamp" aria-hidden="true"><b>RAGI</b><span lang="kn">ರಾಗಿ</span><small>KARNATAKA</small></div>
+        </div>
+        <div class="rating-row">
+          <div class="rating" id="rating" role="img" aria-label="Star rating"></div>
+          <p class="end-score"><b id="endScore">0</b><span id="endBest"></span></p>
+        </div>
+        <ul class="stats">
+          <li><span>Farm</span><b id="statFarm"></b></li>
+          <li><span>Kitchen</span><b id="statKitchen"></b></li>
+          <li><span>Road</span><b id="statRoad"></b></li>
+          <li><span>You</span><b id="statYou"></b></li>
+        </ul>
+        <button class="btn btn-offer" id="offerBtn" type="button">₹45 Trial Pack Offer</button>
+        <div class="end-actions">
+          <button class="btn btn-ghost" id="shareBtn" type="button">Share</button>
+          <button class="btn btn-ghost" id="againBtn" type="button">Play again</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="title" id="title" aria-label="Start">
+      <div class="title-card">
+        <div class="brand"><span class="brand-name"><svg class="ico"><use href="#i-leaf"/></svg>Nutrielle</span><span class="brand-by">by IBP</span><span class="demo-badge" id="demoBadge" hidden>Demo plays itself</span></div>
+        <h1 class="title-h">Farm to First Bite</h1>
+        <p class="title-p">Take our ragi from a partner farm in Karnataka to your first bite. Harvest, bake, deliver, taste. You have 60 seconds.</p>
+        <ol class="route" aria-label="Four stages">
+          <li><svg class="ico c-ragi"><use href="#i-ragi"/></svg><b>Harvest</b><span>15 s</span></li>
+          <li><svg class="ico c-olive"><use href="#i-oven"/></svg><b>Bake</b><span>30 s</span></li>
+          <li><svg class="ico c-olive"><use href="#i-truck"/></svg><b>Deliver</b><span>10 s</span></li>
+          <li><svg class="ico c-ragi"><use href="#i-cookie"/></svg><b>Bite</b><span>5 s</span></li>
+        </ol>
+        <label class="cam-opt" for="camToggle">
+          <input class="switch" type="checkbox" id="camToggle" checked>
+          <span>Use my camera for the first bite<small>Optional. Nothing is recorded or uploaded.</small></span>
+        </label>
+        <div class="start-wrap">
+          <button class="btn btn-primary btn-start" id="startBtn" type="button">Start · 60 seconds</button>
+          <p class="start-note" id="startNote"></p>
+          <button class="link-btn" id="skipCamBtn" type="button" hidden>Skip the camera</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="intro" id="intro" hidden>
+      <div class="intro-card">
+        <div class="intro-kicker" id="introKicker">Stage 1 of 4</div>
+        <h2 class="intro-title"><span id="introTitle">Harvest</span> <span class="intro-time" id="introTime">15s</span></h2>
+        <p class="intro-goal" id="introGoal"></p>
+        <p class="intro-carry" id="introCarry"></p>
+        <div class="intro-bar"><span></span></div>
+        <button class="link-btn" id="introGo" type="button">Start now</button>
+      </div>
+    </div>
+
+    <div class="qc" id="qc" hidden role="alertdialog" aria-labelledby="qcTitle" aria-describedby="qcReason">
+      <div class="qc-card">
+        <svg class="qc-stamp" viewBox="0 0 120 120" aria-hidden="true"><use href="#i-qc"/></svg>
+        <h3 class="qc-title" id="qcTitle">Only perfect cookies leave an IBP kitchen.</h3>
+        <p class="qc-reason" id="qcReason"></p>
+      </div>
+    </div>
+
+    <div class="fx" id="fx" aria-hidden="true"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="sheet-backdrop" id="sheet" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <h3 id="sheetTitle"></h3>
+      <div id="sheetBody"></div>
+      <button class="btn btn-ghost" id="sheetClose" type="button">Close</button>
+    </div>
+  </div>
+
+  <div class="rotate">Turn your phone upright to play.</div>
+  <div class="sr-only" id="announcer" aria-live="assertive"></div>
+</main>
+
+<script>
+(() => {
+'use strict';
+
+/* =====================================================================
+   1. CONFIG
+   ===================================================================== */
+const STAGES = [
+  { id: 'harvest', name: 'Harvest',    dur: 15, goal: 'Swipe the basket. Catch ragi and millet; let stones and husk fall.' },
+  { id: 'bake',    name: 'Bake',       dur: 30, goal: 'Mill, mix, bake, pack. Take each cookie out in the golden zone.' },
+  { id: 'deliver', name: 'Deliver',    dur: 10, goal: 'Swipe to change lanes. Drive over the stores and dodge the potholes.' },
+  { id: 'bite',    name: 'First Bite', dur: 5,  goal: 'Your pack has arrived. Open wide, or tap, for the first bite.' },
+];
+const TOTAL_TIME = STAGES.reduce((sum, s) => sum + s.dur, 0);       // 60 seconds of play
+const RECIPE = { name: 'Ragi & Millet', ragi: 1, millet: 1 };         // grain needed per cookie
+const DISTRACTORS = [                                                  // other Nutrielle variants' ingredients
+  { id: 'oats', label: 'Oats' }, { id: 'almonds', label: 'Almonds' },
+  { id: 'choco', label: 'Choco chips' }, { id: 'seeds', label: 'Seeds' },
+];
+const STORES = {
+  kirana: { label: 'KIRANA',         name: 'a kirana',               fill: '#4E6B2E', ink: '#FFFAEE' },
+  super:  { label: 'SUPERMARKET',    name: 'a supermarket',          fill: '#C99A3B', ink: '#2A3D1C' },
+  qcom:   { label: 'QUICK-COMMERCE', name: 'a quick-commerce store', fill: '#2A3D1C', ink: '#F0D38A' },
+};
+const RATING_STEPS = [400, 800, 1200, 1600];                           // score for 2, 3, 4, 5 stars
+const OFFER_CODE = 'TASTE-TRACE-45';
+const DEMO = location.hash === '#demo';                                // #demo: the game plays itself
+const REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const STORE_KEY = 'ibp-farm-to-first-bite';
+
+/* =====================================================================
+   2. GAME STATE — the single source of truth for a run
+   ===================================================================== */
+const GameState = {
+  phase: 'title',          // title | intro | harvest | bake | deliver | bite | end
+  stageIndex: -1,
+  stageTimeLeft: 0,
+  running: false,          // true while the active stage's clock is ticking
+  paused: false,           // tab hidden or phone turned sideways
+  runId: 0,
+  score: 0,
+  best: 0,
+  muted: false,
+  cameraWanted: true,
+  cameraStatus: 'unknown', // unknown | granted | denied | off
+  inventory: { ragi: 0, millet: 0 },                   // Stage 1 → Stage 2
+  harvest: { ragi: 0, millet: 0, golden: 0, stones: 0, husk: 0 },
+  bake: { orders: 0, cookies: 0, rejects: 0 },         // one star per finished order
+  packs: 0,                                            // Stage 2 → Stage 3
+  delivered: { kirana: 0, super: 0, qcom: 0 },
+  potholes: 0,
+  biteMethod: '',
+};
+
+function resetRun() {
+  GameState.runId++;
+  GameState.stageIndex = -1;
+  GameState.stageTimeLeft = 0;
+  GameState.running = false;
+  GameState.score = 0;
+  GameState.inventory = { ragi: 0, millet: 0 };
+  GameState.harvest = { ragi: 0, millet: 0, golden: 0, stones: 0, husk: 0 };
+  GameState.bake = { orders: 0, cookies: 0, rejects: 0 };
+  GameState.packs = 0;
+  GameState.delivered = { kirana: 0, super: 0, qcom: 0 };
+  GameState.potholes = 0;
+  GameState.biteMethod = '';
+}
+
+/* Seconds left in the whole game (current stage + every later stage). */
+function totalTimeLeft() {
+  if (GameState.stageIndex < 0) return TOTAL_TIME;
+  let t = Math.max(0, GameState.stageTimeLeft);
+  for (let i = GameState.stageIndex + 1; i < STAGES.length; i++) t += STAGES[i].dur;
+  return t;
+}
+
+/* =====================================================================
+   3. DOM
+   ===================================================================== */
+const $ = (id) => document.getElementById(id);
+const el = {
+  game: $('game'), hud: $('hud'), playfield: $('playfield'), scene: $('scene'), fx: $('fx'),
+  stageNum: $('stageNum'), stageName: $('stageName'), stageTime: $('stageTime'), stageTimeWrap: $('stageTimeWrap'),
+  totalTime: $('totalTime'), score: $('score'), muteBtn: $('muteBtn'),
+  segs: Array.from(document.querySelectorAll('.journey .seg')),
+  segFills: Array.from(document.querySelectorAll('.journey .seg-fill')),
+  pills: { ragi: $('pillRagi'), millet: $('pillMillet'), stars: $('pillStars'), packs: $('pillPacks'), drops: $('pillDrops') },
+  invRagi: $('invRagi'), invMillet: $('invMillet'), starCount: $('starCount'), packCount: $('packCount'), dropCount: $('dropCount'),
+  title: $('title'), demoBadge: $('demoBadge'), camToggle: $('camToggle'), startBtn: $('startBtn'), startNote: $('startNote'), skipCamBtn: $('skipCamBtn'),
+  intro: $('intro'), introKicker: $('introKicker'), introTitle: $('introTitle'), introTime: $('introTime'), introGoal: $('introGoal'), introCarry: $('introCarry'), introGo: $('introGo'),
+  bake: $('bake'), bakeCap: $('bakeCap'), orders: $('orders'), steps: Array.from(document.querySelectorAll('.steps li')), bench: $('bench'),
+  stMill: $('stMill'), millBtn: $('millBtn'), millstone: $('millstone'), millDots: Array.from(document.querySelectorAll('#millDots i')), millHint: $('millHint'),
+  stMix: $('stMix'), bowl: $('bowl'), mixHint: $('mixHint'), chips: $('chips'),
+  stBake: $('stBake'), ovenCookie: $('ovenCookie'), bakebar: $('bakebar'), bakeBtn: $('bakeBtn'),
+  stPack: $('stPack'), packBtn: $('packBtn'), pouch: $('pouch'), packHint: $('packHint'),
+  stEmpty: $('stEmpty'), emptyMsg: $('emptyMsg'), emptyBonus: $('emptyBonus'),
+  qc: $('qc'), qcReason: $('qcReason'),
+  bite: $('bite'), biteSub: $('biteSub'), biteStage: $('biteStage'), cam: $('cam'), video: $('video'), camCookie: $('camCookie'),
+  tapBite: $('tapBite'), bigCookie: $('bigCookie'), biteWait: $('biteWait'), crunchWord: $('crunchWord'), biteNote: $('biteNote'),
+  end: $('end'), rating: $('rating'), endScore: $('endScore'), endBest: $('endBest'),
+  statFarm: $('statFarm'), statKitchen: $('statKitchen'), statRoad: $('statRoad'), statYou: $('statYou'),
+  offerBtn: $('offerBtn'), shareBtn: $('shareBtn'), againBtn: $('againBtn'),
+  sheet: $('sheet'), sheetTitle: $('sheetTitle'), sheetBody: $('sheetBody'), sheetClose: $('sheetClose'),
+  toast: $('toast'), announcer: $('announcer'),
+};
+
+/* =====================================================================
+   4. UTILITIES
+   ===================================================================== */
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = (arr) => arr[(Math.random() * arr.length) | 0];
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const fmtTime = (s) => { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+const fmtNum = (n) => Math.round(n).toLocaleString('en-IN');
+const plural = (n, one, many) => n + ' ' + (n === 1 ? one : (many || one + 's'));
+function addScore(n) { GameState.score = Math.max(0, GameState.score + n); }
+function buzz(pattern) { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) { /* not available here */ } }
+function escapeHtml(s) { return s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+/* Runs fn after ms, but only if the same run and stage are still active. */
+function later(ms, fn) {
+  const run = GameState.runId, stage = GameState.stageIndex;
+  return setTimeout(() => { if (run === GameState.runId && stage === GameState.stageIndex) fn(); }, ms);
+}
+
+/* Fast, reliable tap for DOM buttons: touchend on phones (no ghost click), click for mouse and keyboard. */
+function onTap(node, handler) {
+  let sx = 0, sy = 0;
+  node.addEventListener('touchstart', (e) => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; }, { passive: true });
+  node.addEventListener('touchend', (e) => {
+    const t = e.changedTouches && e.changedTouches[0];
+    if (t) {
+      if (Math.hypot(t.clientX - sx, t.clientY - sy) > 14) return;            // it was a swipe or scroll
+      const hit = document.elementFromPoint(t.clientX, t.clientY);
+      if (hit && !node.contains(hit)) return;                                  // finger slid off the button
+    }
+    e.preventDefault();
+    if (!node.disabled) handler(e);
+  }, { passive: false });
+  node.addEventListener('click', (e) => { if (!node.disabled) handler(e); });
+}
+
+let toastTimer = 0;
+function toast(msg, ms = 1500) {
+  el.toast.textContent = msg;
+  el.toast.classList.add('is-on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.toast.classList.remove('is-on'), ms);
+}
+function announce(msg) { el.announcer.textContent = ''; setTimeout(() => { el.announcer.textContent = msg; }, 40); }
+
+function popPill(name) {
+  const p = el.pills[name]; if (!p) return;
+  p.classList.remove('is-pop'); void p.offsetWidth; p.classList.add('is-pop');
+}
+
+/* DOM particle bursts (flour, crumbs, confetti) placed in playfield coordinates. */
+function spawnBits(cls, n, x, y, o) {
+  if (REDUCED) return;
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement('i');
+    s.className = cls;
+    s.style.left = x + 'px'; s.style.top = y + 'px';
+    s.style.setProperty('--dx', rand(-o.spread, o.spread).toFixed(0) + 'px');
+    s.style.setProperty('--dy', rand(o.dyMin, o.dyMax).toFixed(0) + 'px');
+    s.style.setProperty('--rot', rand(-220, 220).toFixed(0) + 'deg');
+    if (o.colors) s.style.background = pick(o.colors);
+    el.fx.appendChild(s);
+    setTimeout(() => s.remove(), o.life || 900);
+  }
+}
+function centerOf(node) {
+  const r = node.getBoundingClientRect(), p = el.playfield.getBoundingClientRect();
+  return { x: r.left - p.left + r.width / 2, y: r.top - p.top + r.height / 2, w: r.width, h: r.height };
+}
+
+/* Colour helpers for the baking cookie. */
+function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function mixColor(a, b, t) { const A = hexToRgb(a), B = hexToRgb(b); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], t))).join(',')})`; }
+function cookieColor(p, z0, z1) {
+  if (p < z0) return mixColor('#D8BE97', '#8F5530', p / z0);
+  if (p <= z1) return '#8F5530';
+  return mixColor('#8F5530', '#2E1B0E', clamp((p - z1) / (1 - z1), 0, 1));
+}
+
+/* =====================================================================
+   5. PREFERENCES (best score, mute, camera) — browser storage, optional
+   ===================================================================== */
+function loadPrefs() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    GameState.best = Number(d.best) || 0;
+    GameState.muted = !!d.muted;
+    if (typeof d.cameraWanted === 'boolean') GameState.cameraWanted = d.cameraWanted;
+  } catch (e) { /* storage blocked: defaults are fine */ }
+}
+function savePrefs() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({ best: GameState.best, muted: GameState.muted, cameraWanted: GameState.cameraWanted })); } catch (e) { /* ignore */ }
+}
+function applyPrefsToUI() {
+  el.camToggle.checked = GameState.cameraWanted;
+  el.muteBtn.setAttribute('aria-pressed', String(GameState.muted));
+  el.muteBtn.setAttribute('aria-label', GameState.muted ? 'Turn sound on' : 'Mute sound');
+  el.muteBtn.querySelector('use').setAttribute('href', GameState.muted ? '#i-mute' : '#i-sound');
+}
+
+/* =====================================================================
+   6. SOUND — tiny Web Audio synth, no files
+   ===================================================================== */
+const Sound = {
+  ctx: null, out: null, noiseBuf: null,
+  init() {
+    if (this.ctx) { this.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try { this.ctx = new AC(); } catch (e) { return; }
+    this.out = this.ctx.createDynamicsCompressor();
+    const master = this.ctx.createGain();
+    master.gain.value = 0.85;
+    this.out.connect(master); master.connect(this.ctx.destination);
+    const len = Math.floor(this.ctx.sampleRate * 1.2);
+    const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    this.noiseBuf = buf;
+    try { const s = this.ctx.createBufferSource(); s.buffer = this.ctx.createBuffer(1, 1, 22050); s.connect(this.ctx.destination); s.start(0); } catch (e) { /* iOS unlock */ }
+    this.resume();
+  },
+  resume() { try { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); } catch (e) { /* ignore */ } },
+  suspend() { try { if (this.ctx && this.ctx.state === 'running') this.ctx.suspend(); } catch (e) { /* ignore */ } },
+  ok() { return !!this.ctx && !GameState.muted; },
+  tone(freq, dur, type = 'sine', vol = 0.2, delay = 0, slideTo = 0) {
+    if (!this.ok()) return;
+    const c = this.ctx, t = c.currentTime + delay;
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(this.out);
+    o.start(t); o.stop(t + dur + 0.03);
+  },
+  noise(delay, dur, type, freq, q, vol, sweepTo) {
+    if (!this.ok()) return;
+    const c = this.ctx, t = c.currentTime + delay;
+    const src = c.createBufferSource(); src.buffer = this.noiseBuf;
+    const f = c.createBiquadFilter(); f.type = type; f.frequency.setValueAtTime(freq, t); f.Q.value = q;
+    if (sweepTo) f.frequency.exponentialRampToValueAtTime(sweepTo, t + dur);
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + Math.min(0.004, dur / 3));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f); f.connect(g); g.connect(this.out);
+    const off = Math.random() * Math.max(0, this.noiseBuf.duration - dur - 0.1);
+    src.start(t, off, dur + 0.05);
+  },
+  pick(step) { this.tone(560 + step * 70, 0.09, 'triangle', 0.16); this.tone(860 + step * 70, 0.07, 'sine', 0.06, 0.03); },
+  golden() { [880, 1109, 1319, 1760].forEach((f, i) => this.tone(f, 0.18, 'triangle', 0.11, i * 0.05)); },
+  thud() { this.tone(150, 0.2, 'sine', 0.3, 0, 70); this.noise(0, 0.09, 'lowpass', 520, 0.8, 0.2); },
+  soft() { this.noise(0, 0.12, 'bandpass', 700, 0.8, 0.13); },
+  tap() { this.noise(0, 0.035, 'highpass', 2200, 0.7, 0.1); },
+  grind() { this.noise(0, 0.18, 'bandpass', 360, 0.9, 0.3); this.noise(0.05, 0.12, 'bandpass', 900, 1.2, 0.12); },
+  stir() { this.noise(0, 0.4, 'bandpass', 520, 0.6, 0.12, 900); },
+  oven() { this.tone(200, 0.3, 'sine', 0.08, 0, 300); },
+  chime() { this.tone(988, 0.3, 'sine', 0.14); this.tone(1480, 0.42, 'sine', 0.1, 0.08); },
+  seal() { this.noise(0, 0.07, 'highpass', 1800, 0.7, 0.14); this.tone(660, 0.12, 'triangle', 0.12, 0.04); this.tone(990, 0.2, 'triangle', 0.1, 0.11); },
+  reject() { this.tone(220, 0.2, 'triangle', 0.16); this.tone(165, 0.34, 'triangle', 0.16, 0.17); },
+  ding() { this.tone(1568, 0.32, 'sine', 0.13); this.tone(2093, 0.4, 'sine', 0.07, 0.05); },
+  swish() { this.noise(0, 0.13, 'bandpass', 900, 0.7, 0.09, 2400); },
+  whoosh() { this.noise(0, 0.38, 'bandpass', 380, 0.8, 0.12, 2600); },
+  /* The hero sound: a snap, a burst of crackles, then a smaller chew. */
+  crunch() {
+    if (!this.ok()) return;
+    this.noise(0, 0.09, 'lowpass', 950, 0.7, 0.55);
+    this.tone(120, 0.13, 'sine', 0.32, 0, 55);
+    const n = 15;
+    for (let i = 0; i < n; i++) {
+      this.noise(Math.pow(Math.random(), 1.6) * 0.26, rand(0.008, 0.032), 'bandpass', rand(1500, 5200), rand(1.2, 4), rand(0.2, 0.45) * (1 - i / (n + 5)));
+    }
+    for (let i = 0; i < 8; i++) {
+      this.noise(0.36 + Math.random() * 0.18, rand(0.008, 0.026), 'bandpass', rand(1300, 4200), rand(1, 3), rand(0.1, 0.22));
+    }
+  },
+};
+
+/* =====================================================================
+   7. CANVAS
+   ===================================================================== */
+const canvas = el.scene;
+const ctx = canvas.getContext('2d');
+let W = 360, H = 560, DPR = 1;
+
+function resizeCanvas() {
+  const r = el.playfield.getBoundingClientRect();
+  if (r.width < 20 || r.height < 20) return;
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  W = r.width; H = r.height;
+  canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  Harvest.layout(); Deliver.layout();
+}
+
+function roundRectPath(g, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  g.beginPath();
+  g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.quadraticCurveTo(x + w, y, x + w, y + r);
+  g.lineTo(x + w, y + h - r); g.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  g.lineTo(x + r, y + h); g.quadraticCurveTo(x, y + h, x, y + h - r);
+  g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y);
+  g.closePath();
+}
+function drawSparkle(g, x, y, r, color) {
+  g.fillStyle = color; g.beginPath();
+  g.moveTo(x, y - r); g.quadraticCurveTo(x, y, x + r, y); g.quadraticCurveTo(x, y, x, y + r);
+  g.quadraticCurveTo(x, y, x - r, y); g.quadraticCurveTo(x, y, x, y - r); g.fill();
+}
+function drawLeaf(g, x, y, s, color) {
+  g.fillStyle = color; g.beginPath();
+  g.moveTo(x - s, y + s * 0.6); g.quadraticCurveTo(x - s * 0.6, y - s, x + s, y - s * 0.8);
+  g.quadraticCurveTo(x + s * 0.4, y + s * 0.6, x - s, y + s * 0.6); g.fill();
+}
+
+/* ---- Falling items (harvest) ---- */
+function stonePoly() {
+  const pts = [];
+  for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2; pts.push([Math.cos(a) * rand(0.78, 1), Math.sin(a) * rand(0.68, 0.92)]); }
+  return pts;
+}
+/* Finger millet (ragi) head: five spikes of grain that curl inwards like a loose fist. */
+function drawRagiHead(g, s, gold, t) {
+  const grain = gold ? '#E2B243' : '#7A3E22', light = gold ? '#FFF1BF' : '#B0683F';
+  if (gold) { g.shadowColor = 'rgba(240, 200, 90, .95)'; g.shadowBlur = s * 0.55; }
+  g.strokeStyle = gold ? '#B98A2E' : '#6F8040'; g.lineWidth = Math.max(1.5, s * 0.07); g.lineCap = 'round';
+  g.beginPath(); g.moveTo(0, s * 0.52); g.quadraticCurveTo(s * 0.05, s * 0.22, 0, s * 0.04); g.stroke();
+  const n = 5;
+  for (let i = 0; i < n; i++) {
+    const side = i - (n - 1) / 2;
+    let a = -Math.PI / 2 + side * 0.56;
+    const curl = -side * 0.05;
+    let px = 0, py = s * 0.03;
+    const step = s * (Math.abs(side) === 2 ? 0.088 : 0.1);
+    for (let k = 0; k < 5; k++) {
+      a += curl;
+      px += Math.cos(a) * step; py += Math.sin(a) * step;
+      const rr = s * 0.066 * (1 - k * 0.1);
+      g.fillStyle = grain; g.beginPath(); g.ellipse(px, py, rr * 1.15, rr, a, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = gold ? 'rgba(150, 105, 25, .55)' : 'rgba(60, 25, 10, .45)'; g.lineWidth = 0.8; g.stroke();
+      g.fillStyle = light; g.globalAlpha = 0.55;
+      g.beginPath(); g.arc(px - rr * 0.3, py - rr * 0.3, rr * 0.36, 0, Math.PI * 2); g.fill();
+      g.globalAlpha = 1;
+    }
+  }
+  g.shadowBlur = 0;
+  if (gold) drawSparkle(g, s * 0.34, -s * 0.44, s * 0.17 * (0.6 + 0.4 * Math.sin(t * 9)), '#FFF6D8');
+}
+/* Millet: a golden spike dotted with grain. */
+function drawMillet(g, s) {
+  g.strokeStyle = '#6F8040'; g.lineWidth = Math.max(1.5, s * 0.06); g.lineCap = 'round';
+  g.beginPath(); g.moveTo(0, s * 0.55); g.lineTo(0, s * 0.26); g.stroke();
+  g.fillStyle = '#7E9A50'; g.beginPath();
+  g.moveTo(0, s * 0.42); g.quadraticCurveTo(s * 0.3, s * 0.3, s * 0.36, s * 0.12); g.quadraticCurveTo(s * 0.16, s * 0.3, 0, s * 0.48); g.fill();
+  const w = s * 0.32, h = s * 0.64;
+  const gr = g.createLinearGradient(-w / 2, 0, w / 2, 0);
+  gr.addColorStop(0, '#C48A2A'); gr.addColorStop(0.5, '#EABD5E'); gr.addColorStop(1, '#BC8427');
+  g.fillStyle = gr; roundRectPath(g, -w / 2, -h * 0.58, w, h, w / 2); g.fill();
+  g.fillStyle = 'rgba(122, 78, 22, .55)';
+  for (let row = 0; row < 7; row++) for (let col = 0; col < 3; col++) {
+    const yy = -h * 0.5 + row * h * 0.13, xx = (col - 1) * w * 0.27 + (row % 2 ? w * 0.13 : 0);
+    if (Math.abs(xx) < w * 0.4) { g.beginPath(); g.arc(xx, yy, s * 0.028, 0, Math.PI * 2); g.fill(); }
+  }
+}
+function drawStone(g, s, poly) {
+  const r = s * 0.45;
+  const path = (k, dx, dy) => { g.beginPath(); poly.forEach(([x, y], i) => { const X = x * r * k + dx, Y = y * r * k + dy; if (i) g.lineTo(X, Y); else g.moveTo(X, Y); }); g.closePath(); };
+  g.fillStyle = '#8B877B'; path(1, 0, 0); g.fill();
+  g.strokeStyle = 'rgba(40, 38, 30, .35)'; g.lineWidth = 1; g.stroke();
+  g.fillStyle = '#ACA899'; path(0.58, -r * 0.14, -r * 0.18); g.fill();
+}
+function drawHusk(g, s) {
+  g.fillStyle = '#CDB78A'; g.strokeStyle = '#A48A57'; g.lineWidth = 1.2;
+  g.beginPath(); g.moveTo(-s * 0.42, s * 0.1); g.quadraticCurveTo(0, -s * 0.46, s * 0.42, s * 0.05); g.quadraticCurveTo(0, -s * 0.12, -s * 0.42, s * 0.1); g.closePath(); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(-s * 0.28, s * 0.04); g.quadraticCurveTo(0, -s * 0.24, s * 0.28, 0); g.stroke();
+}
+function drawItem(g, it) {
+  g.save(); g.translate(it.x, it.y); g.rotate(it.rot);
+  if (it.type === 'ragi' || it.type === 'golden') drawRagiHead(g, it.s, it.type === 'golden', it.t || 0);
+  else if (it.type === 'millet') drawMillet(g, it.s);
+  else if (it.type === 'stone') drawStone(g, it.s, it.poly);
+  else drawHusk(g, it.s);
+  g.restore();
+}
+
+/* Woven basket with the "by IBP" tag; a grain mound grows as the inventory grows. */
+function drawBasket(g, b, fill) {
+  const x = b.x + (b.shake > 0 && !REDUCED ? Math.sin(performance.now() / 22) * 5 * b.shake : 0);
+  const w = b.w * (1 + 0.07 * b.squash), h = b.h * (1 - 0.09 * b.squash);
+  const top = b.y - h * 0.42, bot = b.y + h * 0.58, bw = w * 0.78;
+  g.save();
+  g.fillStyle = 'rgba(42, 61, 28, .24)'; g.beginPath(); g.ellipse(x, bot + 3, w * 0.42, h * 0.1, 0, 0, Math.PI * 2); g.fill();
+  if (fill > 0) {
+    const mh = Math.min(1, fill / 26) * h * 0.55;
+    g.fillStyle = '#8E522D';
+    g.beginPath(); g.moveTo(x - w * 0.45, top + 3); g.quadraticCurveTo(x, top - mh * 2, x + w * 0.45, top + 3); g.closePath(); g.fill();
+    for (let i = 0; i < 15; i++) {
+      const u = i / 14, fx = x + (u - 0.5) * w * 0.8, fy = top - Math.sin(u * Math.PI) * mh * 0.85 + 2 + (i % 3);
+      g.fillStyle = i % 3 === 0 ? '#E0B04F' : '#5E2D16'; g.beginPath(); g.arc(fx, fy, 2.1, 0, Math.PI * 2); g.fill();
+    }
+  }
+  const grd = g.createLinearGradient(0, top, 0, bot);
+  grd.addColorStop(0, '#C99B58'); grd.addColorStop(1, '#A47639');
+  g.fillStyle = grd;
+  g.beginPath();
+  g.moveTo(x - w / 2, top); g.lineTo(x + w / 2, top); g.lineTo(x + bw / 2, bot - 6);
+  g.quadraticCurveTo(x + bw / 2, bot, x + bw / 2 - 8, bot); g.lineTo(x - bw / 2 + 8, bot);
+  g.quadraticCurveTo(x - bw / 2, bot, x - bw / 2, bot - 6); g.closePath(); g.fill();
+  g.save(); g.clip();
+  g.strokeStyle = 'rgba(110, 72, 30, .45)'; g.lineWidth = 2;
+  for (let yy = top + 6; yy < bot; yy += 7) { g.beginPath(); g.moveTo(x - w, yy); g.lineTo(x + w, yy); g.stroke(); }
+  g.strokeStyle = 'rgba(255, 236, 196, .28)'; g.lineWidth = 3;
+  for (let i = -6; i <= 6; i++) { const xx = x + i * w * 0.085; g.beginPath(); g.moveTo(xx, top); g.lineTo(xx - (xx - x) * 0.2, bot); g.stroke(); }
+  g.restore();
+  g.fillStyle = '#4E6B2E'; roundRectPath(g, x - w / 2 - 4, top - 6, w + 8, 11, 5.5); g.fill();
+  g.fillStyle = 'rgba(255, 250, 238, .25)'; roundRectPath(g, x - w / 2, top - 5, w, 3, 1.5); g.fill();
+  const lw = w * 0.4, lh = Math.max(14, h * 0.3), ly = top + h * 0.27;
+  g.fillStyle = '#FFFAEE'; roundRectPath(g, x - lw / 2, ly, lw, lh, 4); g.fill();
+  g.fillStyle = '#2A3D1C'; g.font = `700 ${Math.round(lh * 0.52)}px Hind, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('by IBP', x, ly + lh / 2 + 1);
+  g.restore();
+}
+
+/* Canvas particles and floating score text. */
+function burst(arr, x, y, color, n, sparkle) {
+  const count = REDUCED ? Math.ceil(n / 3) : n;
+  for (let i = 0; i < count; i++) {
+    const a = rand(-Math.PI * 0.95, -Math.PI * 0.05), sp = rand(60, 200);
+    arr.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rand(0.4, 0.75), max: 0.75, r: rand(1.6, 3.4), color, sparkle: !!sparkle });
+  }
+  if (arr.length > 160) arr.splice(0, arr.length - 160);
+}
+function floatText(arr, text, x, y, kind) { arr.push({ text, x, y, life: 0.95, max: 0.95, kind }); if (arr.length > 8) arr.shift(); }
+function updateFx(parts, floats, dt) {
+  for (const p of parts) { p.life -= dt; p.vy += 420 * dt; p.x += p.vx * dt; p.y += p.vy * dt; }
+  for (let i = parts.length - 1; i >= 0; i--) if (parts[i].life <= 0) parts.splice(i, 1);
+  for (const f of floats) { f.life -= dt; f.y -= 40 * dt; }
+  for (let i = floats.length - 1; i >= 0; i--) if (floats[i].life <= 0) floats.splice(i, 1);
+}
+function drawFx(g, parts, floats) {
+  for (const p of parts) {
+    g.globalAlpha = clamp(p.life / p.max, 0, 1);
+    if (p.sparkle) drawSparkle(g, p.x, p.y, p.r * 1.9, '#FFF1BF');
+    else { g.fillStyle = p.color; g.beginPath(); g.arc(p.x, p.y, p.r, 0, Math.PI * 2); g.fill(); }
+  }
+  g.globalAlpha = 1;
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  for (const f of floats) {
+    g.globalAlpha = clamp(f.life / f.max, 0, 1);
+    g.font = `700 ${f.kind === 'gold' ? 17 : 15}px Hind, sans-serif`;
+    g.lineWidth = 4; g.strokeStyle = 'rgba(255, 250, 238, .92)'; g.strokeText(f.text, f.x, f.y);
+    g.fillStyle = f.kind === 'bad' ? '#A0452F' : f.kind === 'gold' ? '#8C6716' : '#2A3D1C';
+    g.fillText(f.text, f.x, f.y);
+  }
+  g.globalAlpha = 1;
+}
+
+/* ---- Farm background (cached to an offscreen canvas) ---- */
+function hills(g, baseY, amp, color, phase, freq) {
+  g.fillStyle = color; g.beginPath(); g.moveTo(0, H);
+  for (let x = 0; x <= W + 6; x += 6) {
+    const u = x / W;
+    g.lineTo(x, baseY - Math.sin(u * Math.PI * freq + phase) * amp - Math.sin(u * Math.PI * freq * 2.3 + phase * 1.7) * amp * 0.35);
+  }
+  g.lineTo(W, H); g.closePath(); g.fill();
+}
+function drawSign(g, x, y) {
+  g.fillStyle = '#7A5A36'; g.fillRect(x - 2.5, y, 5, 46);
+  const bw = 96, bh = 52, bx = x - bw / 2, by = y - bh + 8;
+  g.fillStyle = 'rgba(42, 61, 28, .2)'; roundRectPath(g, bx + 3, by + 3, bw, bh, 6); g.fill();
+  g.fillStyle = '#FBF3DF'; roundRectPath(g, bx, by, bw, bh, 6); g.fill();
+  g.strokeStyle = '#4E6B2E'; g.lineWidth = 2; roundRectPath(g, bx + 3, by + 3, bw - 6, bh - 6, 4); g.stroke();
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillStyle = '#4E6B2E'; g.font = '700 8.5px Hind, sans-serif';
+  g.fillText('PARTNER FARM', x, by + 13);
+  g.fillStyle = '#7A3E22'; g.font = '700 14px Kalam, cursive';
+  g.fillText('Karnataka', x, by + 27);
+  g.fillStyle = '#2A3D1C'; g.font = '600 11px "Noto Sans Kannada", "Kannada Sangam MN", "Nirmala UI", Tunga, sans-serif';
+  g.fillText('ರಾಗಿ · ragi', x, by + 41);
+}
+function buildFarmBg() {
+  const c = document.createElement('canvas');
+  c.width = Math.round(W * DPR); c.height = Math.round(H * DPR);
+  const g = c.getContext('2d');
+  g.setTransform(DPR, 0, 0, DPR, 0, 0);
+  let gr = g.createLinearGradient(0, 0, 0, H * 0.45);
+  gr.addColorStop(0, '#E3EACD'); gr.addColorStop(1, '#F8EED6');
+  g.fillStyle = gr; g.fillRect(0, 0, W, H);
+  const sx = W * 0.8, sy = H * 0.12, sr = Math.min(W, H) * 0.065;
+  gr = g.createRadialGradient(sx, sy, sr * 0.3, sx, sy, sr * 3.2);
+  gr.addColorStop(0, 'rgba(240, 211, 138, .85)'); gr.addColorStop(0.4, 'rgba(240, 211, 138, .3)'); gr.addColorStop(1, 'rgba(240, 211, 138, 0)');
+  g.fillStyle = gr; g.fillRect(0, 0, W, H * 0.5);
+  g.fillStyle = '#F2D48A'; g.beginPath(); g.arc(sx, sy, sr, 0, Math.PI * 2); g.fill();
+  hills(g, H * 0.33, H * 0.035, '#C5D0A5', 0.9, 2.2);
+  hills(g, H * 0.39, H * 0.028, '#A0B57A', 1.7, 1.4);
+  const fy = H * 0.43;
+  let y = fy, row = 0;
+  while (y < H) {
+    const d = (y - fy) / (H - fy);
+    const hgt = lerp(4, 30, Math.pow(d, 1.25));
+    g.fillStyle = row % 2 ? '#6F8C43' : '#7D9950';
+    g.fillRect(0, y, W, hgt + 1);
+    const sz = lerp(2.5, 10, d), gap = lerp(8, 30, d);
+    g.globalAlpha = lerp(0.9, 0.45, d);
+    for (let x = (row % 2) * gap / 2; x < W + gap; x += gap) {
+      const bx = x + Math.sin(x * 0.37 + row) * gap * 0.15, base = y + hgt * 0.92;
+      g.strokeStyle = '#3E5826'; g.lineWidth = Math.max(0.7, sz * 0.16);
+      g.beginPath(); g.moveTo(bx, base); g.lineTo(bx - sz * 0.25, base - sz); g.moveTo(bx, base); g.lineTo(bx + sz * 0.28, base - sz * 0.9); g.stroke();
+      g.fillStyle = '#7A3E22';
+      g.beginPath(); g.arc(bx - sz * 0.25, base - sz, sz * 0.2, 0, Math.PI * 2); g.arc(bx + sz * 0.28, base - sz * 0.9, sz * 0.17, 0, Math.PI * 2); g.fill();
+    }
+    g.globalAlpha = 1;
+    y += hgt; row++;
+  }
+  const gy = H - 36;
+  gr = g.createLinearGradient(0, gy, 0, H);
+  gr.addColorStop(0, '#CDB27E'); gr.addColorStop(1, '#B6955C');
+  g.fillStyle = gr;
+  g.beginPath(); g.moveTo(0, gy + 6); g.quadraticCurveTo(W * 0.5, gy - 8, W, gy + 6); g.lineTo(W, H); g.lineTo(0, H); g.closePath(); g.fill();
+  g.fillStyle = 'rgba(122, 82, 40, .25)';
+  for (let i = 0; i < 40; i++) { g.beginPath(); g.arc(rand(0, W), rand(gy + 6, H), rand(0.8, 1.8), 0, Math.PI * 2); g.fill(); }
+  drawSign(g, Math.min(W * 0.2, 80), fy + 10);
+  return c;
+}
+
+/* =====================================================================
+   8. STAGE 1 — HARVEST (canvas)
+   ===================================================================== */
+const Keys = { left: false, right: false };
+const Ambient = {
+  items: [],
+  update(dt) {
+    if (this.items.length < 7 && Math.random() < dt * 2.2) {
+      const type = Math.random() < 0.55 ? 'ragi' : 'millet';
+      this.items.push({ type, x: rand(24, W - 24), y: -30, vy: rand(28, 52), rot: rand(-0.5, 0.5), vr: rand(-0.6, 0.6), s: rand(24, 34), t: 0 });
+    }
+    for (const it of this.items) { it.y += it.vy * dt; it.rot += it.vr * dt; it.t += dt; }
+    this.items = this.items.filter((it) => it.y < H * 0.62);
+  },
+};
+
+const Harvest = {
+  items: [], parts: [], floats: [], bg: null,
+  basket: { x: 180, tx: 180, y: 0, w: 120, h: 66, squash: 0, shake: 0 },
+  size: 38, t: 0, spawnT: 0,
+  layout() {
+    const b = this.basket;
+    b.w = clamp(W * 0.31, 100, 150); b.h = b.w * 0.56;
+    b.y = H - b.h * 0.5 - 22;
+    b.x = clamp(b.x, b.w / 2 + 6, W - b.w / 2 - 6); b.tx = clamp(b.tx, b.w / 2 + 6, W - b.w / 2 - 6);
+    this.size = clamp(W * 0.125, 36, 54);
+    this.bg = null;
+  },
+  enter() {
+    this.items = []; this.parts = []; this.floats = []; this.t = 0; this.spawnT = 0.35;
+    const b = this.basket; b.x = b.tx = W / 2; b.squash = b.shake = 0;
+    showScene('canvas'); setPills(['ragi', 'millet']);
+    canvas.setAttribute('aria-label', 'Harvest at a partner farm in Karnataka. Drag, swipe or use the arrow keys to move the basket. Catch ragi and millet; avoid stones and husk.');
+  },
+  start() {},
+  update(dt) {
+    this.t += dt;
+    const p = clamp(this.t / STAGES[0].dur, 0, 1);
+    this.spawnT -= dt;
+    if (this.spawnT <= 0) { this.spawn(p); this.spawnT = lerp(0.52, 0.34, p) * rand(0.8, 1.2); }
+    const b = this.basket;
+    if (Keys.left) b.tx -= 560 * dt;
+    if (Keys.right) b.tx += 560 * dt;
+    b.tx = clamp(b.tx, b.w / 2 + 6, W - b.w / 2 - 6);
+    b.x += (b.tx - b.x) * (1 - Math.pow(1e-6, dt));
+    b.squash = Math.max(0, b.squash - dt * 5);
+    b.shake = Math.max(0, b.shake - dt * 3.5);
+    const rim = b.y - b.h * 0.42;
+    for (const it of this.items) {
+      it.t += dt;
+      it.y += it.vy * dt;
+      it.x = it.x0 + Math.sin(it.t * it.wf) * it.wa;
+      it.rot += it.vr * dt;
+      const inBand = it.y + it.r * 0.5 >= rim && it.y - it.r * 0.5 <= rim + b.h * 0.3;
+      if (!it.done && inBand && Math.abs(it.x - b.x) <= b.w * 0.47) { it.done = true; this.collect(it); }
+      if (it.y - it.r > H + 10) it.done = true;
+    }
+    this.items = this.items.filter((it) => !it.done);
+    updateFx(this.parts, this.floats, dt);
+  },
+  spawn(p) {
+    const r = Math.random();
+    const type = r < 0.38 ? 'ragi' : r < 0.72 ? 'millet' : r < 0.78 ? 'golden' : r < 0.91 ? 'stone' : 'husk';
+    const s = this.size * (type === 'stone' ? 0.82 : type === 'husk' ? 0.88 : 1);
+    const speed = { ragi: 1, millet: 1, golden: 1.2, stone: 1.1, husk: 0.75 }[type];
+    const x0 = rand(s * 0.7, W - s * 0.7);
+    this.items.push({
+      type, x: x0, x0, y: -s, s, r: s * 0.5,
+      vy: H * lerp(0.34, 0.54, p) * speed * rand(0.9, 1.12),
+      rot: rand(-0.4, 0.4), vr: rand(-1, 1) * (type === 'husk' ? 2.5 : 1),
+      t: rand(0, 6), wf: rand(1.4, 2.6), wa: type === 'husk' ? s * 0.55 : rand(0, s * 0.12),
+      poly: type === 'stone' ? stonePoly() : null, done: false,
+    });
+  },
+  collect(it) {
+    const inv = GameState.inventory, h = GameState.harvest, b = this.basket;
+    const fx = clamp(it.x, 48, W - 48), fy = b.y - b.h * 0.95, by = b.y - b.h * 0.45;
+    switch (it.type) {
+      case 'ragi':
+        inv.ragi++; h.ragi++; addScore(10);
+        floatText(this.floats, '+1 ragi', fx, fy, 'ok'); burst(this.parts, it.x, by, '#7A3E22', 6);
+        Sound.pick(0); buzz(8); b.squash = 1; popPill('ragi'); break;
+      case 'millet':
+        inv.millet++; h.millet++; addScore(10);
+        floatText(this.floats, '+1 millet', fx, fy, 'ok'); burst(this.parts, it.x, by, '#D9A441', 6);
+        Sound.pick(3); buzz(8); b.squash = 1; popPill('millet'); break;
+      case 'golden':
+        inv.ragi += 3; h.golden++; addScore(40);
+        floatText(this.floats, 'Golden ragi +3', fx, fy, 'gold'); burst(this.parts, it.x, by, '#E8BE55', 16, true);
+        Sound.golden(); buzz([10, 30, 10]); b.squash = 1.3; popPill('ragi'); break;
+      case 'stone': {
+        h.stones++; const lost = inv.ragi > 0 ? 1 : 0; inv.ragi -= lost; addScore(-15);
+        floatText(this.floats, lost ? 'Stone! −1 ragi' : 'Stone!', fx, fy, 'bad');
+        Sound.thud(); buzz([25, 40, 25]); b.shake = 1; break;
+      }
+      default:
+        h.husk++; addScore(-5);
+        floatText(this.floats, 'Husk −5', fx, fy, 'bad');
+        Sound.soft(); buzz(15); b.shake = 0.6;
+    }
+  },
+  timeUp() { endStage(); },
+  render() {
+    if (!this.bg) this.bg = buildFarmBg();
+    ctx.drawImage(this.bg, 0, 0, W, H);
+    if (GameState.phase === 'title') { for (const it of Ambient.items) drawItem(ctx, it); return; }
+    for (const it of this.items) drawItem(ctx, it);
+    drawBasket(ctx, this.basket, GameState.inventory.ragi + GameState.inventory.millet);
+    drawFx(ctx, this.parts, this.floats);
+  },
+};
+
+/* =====================================================================
+   9. STAGE 2 — BAKE (DOM time-management)
+   ===================================================================== */
+function showQC(reason) {
+  el.qcReason.textContent = reason;
+  el.qc.hidden = false;
+  const card = el.qc.firstElementChild;
+  card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
+}
+function hideQC() { el.qc.hidden = true; }
+
+const Bake = {
+  queue: [], active: null, step: 0, millTaps: 0, locked: false,
+  baking: false, bakeP: 0, bakeDur: 2.6, zone: [0.62, 0.79],
+  orderStartAt: 0, nextId: 1, emptyAtStart: false, chipOptions: [],
+  enter() {
+    showScene('bake'); setPills(['ragi', 'millet', 'stars']);
+    canvas.setAttribute('aria-label', '');
+    this.queue = []; this.active = null; this.step = 0; this.millTaps = 0; this.locked = false; this.baking = false; this.nextId = 1;
+    while (this.queue.length < 3) this.queue.push(this.newOrder());
+    const max = this.maxCookies();
+    el.bakeCap.textContent = max > 0 ? `Your harvest makes ${plural(max, 'cookie')}` : 'Your basket is empty';
+    this.emptyAtStart = max <= 0;
+    if (this.emptyAtStart) { this.active = null; this.showEmpty(0); this.renderOrders(); }
+    else this.activate();
+  },
+  start() { if (this.emptyAtStart) this.pantryEmpty(); },
+  maxCookies() {
+    const inv = GameState.inventory;
+    return Math.max(0, Math.min(Math.floor(inv.ragi / RECIPE.ragi), Math.floor(inv.millet / RECIPE.millet)));
+  },
+  newOrder() { const r = Math.random(); return { id: this.nextId++, qty: r < 0.5 ? 1 : r < 0.88 ? 2 : 3, cut: false }; },
+  /* Take the next ticket; shrink it if the pantry (your harvest) can't cover it. */
+  activate() {
+    const max = this.maxCookies();
+    if (max <= 0) { this.pantryEmpty(); return; }
+    const o = this.queue[0];
+    if (o.qty > max) { o.qty = max; o.cut = true; }
+    this.active = o;
+    this.orderStartAt = GameState.stageTimeLeft;
+    this.renderOrders(); this.showStation(0);
+  },
+  showStation(i) {
+    this.step = i;
+    [el.stMill, el.stMix, el.stBake, el.stPack, el.stEmpty].forEach((s, k) => { s.hidden = k !== i; });
+    el.steps.forEach((li, k) => { li.classList.toggle('is-done', k < i); li.classList.toggle('is-active', k === i); });
+    const o = this.active;
+    if (i === 0) {
+      this.millTaps = 0;
+      el.millstone.style.setProperty('--turn', '0deg');
+      this.renderMillDots();
+      el.millHint.textContent = `Tap the millstone 3 times to grind ${o.qty * RECIPE.ragi} ragi into flour`;
+    } else if (i === 1) {
+      el.bowl.classList.remove('is-stirring');
+      el.mixHint.textContent = `Add the grain for ${RECIPE.name} ×${o.qty}`;
+      this.renderChips();
+    } else if (i === 2) {
+      this.baking = false; this.bakeP = 0;
+      const z0 = rand(0.58, 0.68);
+      this.zone = [z0, z0 + 0.17]; this.bakeDur = rand(2.3, 2.9);
+      el.bakebar.style.setProperty('--z0', (this.zone[0] * 100).toFixed(1) + '%');
+      el.bakebar.style.setProperty('--z1', (this.zone[1] * 100).toFixed(1) + '%');
+      el.bakeBtn.textContent = 'Put in oven'; el.bakeBtn.classList.remove('is-hot');
+      this.renderBake();
+    } else if (i === 3) {
+      el.pouch.classList.remove('is-sealed');
+      el.packHint.textContent = `Tap the pouch to pack and seal ${plural(o.qty, 'cookie')}`;
+    }
+  },
+  canAct(i) { return GameState.phase === 'bake' && GameState.running && !this.locked && !!this.active && this.step === i; },
+
+  /* Station 1: Mill — three taps grind the ragi. */
+  tapMill() {
+    if (!this.canAct(0)) return;
+    this.millTaps++;
+    el.millstone.style.setProperty('--turn', (this.millTaps * 120) + 'deg');
+    this.renderMillDots(); Sound.grind(); buzz(6);
+    const c = centerOf(el.millstone);
+    spawnBits('flour', 7, c.x, c.y - c.h * 0.1, { spread: 70, dyMin: -60, dyMax: 30, life: 650 });
+    if (this.millTaps >= 3) {
+      GameState.inventory.ragi -= this.active.qty * RECIPE.ragi;
+      popPill('ragi');
+      this.locked = true;
+      later(240, () => { this.locked = false; this.showStation(1); });
+    }
+  },
+  renderMillDots() { el.millDots.forEach((d, k) => d.classList.toggle('on', k < this.millTaps)); },
+
+  /* Station 2: Mix — pick the right grain; anything else is rejected. */
+  renderChips() {
+    const options = shuffle([{ id: 'millet', label: 'Millet', ok: true }, ...shuffle(DISTRACTORS.slice()).slice(0, 2).map((d) => ({ ...d, ok: false }))]);
+    this.chipOptions = options;
+    el.chips.innerHTML = '';
+    options.forEach((o) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip';
+      b.innerHTML = `<span class="ing ing-${o.id}" aria-hidden="true"></span><span>${o.label}</span>`;
+      onTap(b, () => this.chooseIngredient(o));
+      el.chips.appendChild(b);
+    });
+  },
+  chooseIngredient(o) {
+    if (!this.canAct(1)) return;
+    Sound.tap();
+    if (!o.ok) { this.reject('wrong', o.label); return; }
+    GameState.inventory.millet -= this.active.qty * RECIPE.millet;
+    popPill('millet');
+    this.locked = true;
+    el.bowl.classList.add('is-stirring'); Sound.stir();
+    later(560, () => { this.locked = false; this.showStation(2); });
+  },
+
+  /* Station 3: Bake — one tap starts the oven, the second takes the cookie out. */
+  pressBake() {
+    if (!this.canAct(2)) return;
+    if (!this.baking) {
+      this.baking = true; this.bakeP = 0;
+      el.bakeBtn.textContent = 'Take it out!'; el.bakeBtn.classList.add('is-hot');
+      Sound.oven();
+      return;
+    }
+    this.baking = false;
+    el.bakeBtn.classList.remove('is-hot');
+    const p = this.bakeP, [z0, z1] = this.zone;
+    if (p < z0) { this.reject('under'); return; }
+    if (p > z1) { this.reject('burnt'); return; }
+    Sound.chime(); buzz(10);
+    this.locked = true;
+    el.ovenCookie.classList.add('is-perfect');
+    toast('Golden. A perfect bake.', 900);
+    later(420, () => { this.locked = false; el.ovenCookie.classList.remove('is-perfect'); this.showStation(3); });
+  },
+  renderBake() {
+    const p = this.bakeP, [z0, z1] = this.zone;
+    el.bakebar.style.setProperty('--p', (p * 100).toFixed(1) + '%');
+    el.ovenCookie.style.setProperty('--cookie', cookieColor(p, z0, z1));
+    el.stBake.classList.toggle('in-zone', this.baking && p >= z0 && p <= z1);
+  },
+
+  /* Station 4: Pack — seal it, earn the star, take the next ticket. */
+  tapPack() {
+    if (!this.canAct(3)) return;
+    const o = this.active;
+    this.locked = true;
+    el.pouch.classList.add('is-sealed'); Sound.seal(); buzz([8, 20, 8]);
+    const elapsed = this.orderStartAt - GameState.stageTimeLeft;
+    const bonus = elapsed < 6 ? 50 : elapsed < 9 ? 25 : 0;
+    addScore(100 * o.qty + bonus);
+    GameState.bake.orders++; GameState.bake.cookies += o.qty; GameState.packs += o.qty;
+    popPill('stars');
+    const c = centerOf(el.pouch);
+    spawnBits('bit', 22, c.x, c.y - c.h * 0.3, { spread: 150, dyMin: -150, dyMax: 60, colors: ['#C99A3B', '#4E6B2E', '#F0D38A', '#8DA567'], life: 900 });
+    toast(`Packed ${RECIPE.name} ×${o.qty}` + (bonus ? `  ·  +${bonus} speed bonus` : ''), 1200);
+    announce(`Order packed. ${plural(GameState.bake.orders, 'star')}.`);
+    later(560, () => {
+      this.locked = false;
+      this.queue.shift(); this.queue.push(this.newOrder());
+      this.activate();
+    });
+  },
+
+  update(dt) {
+    if (!this.baking || this.locked) return;
+    this.bakeP += dt / this.bakeDur;
+    if (this.bakeP >= 1) {
+      this.bakeP = 1; this.baking = false; this.renderBake();
+      el.bakeBtn.classList.remove('is-hot');
+      this.reject('burnt');
+      return;
+    }
+    this.renderBake();
+  },
+  /* Quality control: pause, reject, explain. The grain already used is lost. */
+  reject(kind, detail) {
+    this.locked = true; this.baking = false;
+    GameState.bake.rejects++;
+    const reasons = {
+      burnt: 'Burnt. Take it out while the marker is in the golden zone.',
+      under: 'Underbaked. Wait for the golden zone before you take it out.',
+      wrong: `Wrong ingredient. ${detail} is not in ${RECIPE.name}.`,
+    };
+    showQC(reasons[kind]);
+    Sound.reject(); buzz([40, 40, 40]);
+    announce('Rejected. Only perfect cookies leave an IBP kitchen. ' + reasons[kind]);
+    later(1500, () => { hideQC(); this.locked = false; this.restartOrder(); });
+  },
+  restartOrder() {
+    const max = this.maxCookies();
+    if (max <= 0) { this.pantryEmpty(); return; }
+    if (this.active.qty > max) { this.active.qty = max; this.active.cut = true; }
+    this.orderStartAt = GameState.stageTimeLeft;
+    this.renderOrders(); this.showStation(0);
+  },
+  /* Every harvested grain is used: leave early and bank the spare seconds. */
+  pantryEmpty() {
+    const spare = Math.floor(GameState.stageTimeLeft);
+    const bonus = GameState.bake.orders > 0 ? spare * 5 : 0;
+    addScore(bonus);
+    GameState.running = false; this.locked = true; this.active = null;
+    this.showEmpty(bonus); this.renderOrders();
+    announce('Pantry empty. Heading out to deliver.');
+    later(1800, () => endStage());
+  },
+  showEmpty(bonus) {
+    [el.stMill, el.stMix, el.stBake, el.stPack].forEach((s) => { s.hidden = true; });
+    el.stEmpty.hidden = false;
+    el.steps.forEach((li) => li.classList.remove('is-active', 'is-done'));
+    const inv = GameState.inventory;
+    const short = inv.millet < RECIPE.millet && inv.ragi >= RECIPE.ragi ? 'millet' : inv.ragi < RECIPE.ragi && inv.millet >= RECIPE.millet ? 'ragi' : '';
+    if (GameState.bake.orders > 0 && !short) el.emptyMsg.textContent = 'Pantry empty. Every grain you harvested is baked and packed.';
+    else if (short) el.emptyMsg.textContent = `Out of ${short}. ${RECIPE.name} needs both grains, so the kitchen closes early.`;
+    else el.emptyMsg.textContent = 'Not enough grain to bake. Catch more on the farm next time.';
+    el.emptyBonus.textContent = bonus ? `Time bonus +${bonus}` : 'Heading out to deliver…';
+  },
+  renderOrders() {
+    el.orders.innerHTML = '';
+    this.queue.forEach((o) => {
+      const t = document.createElement('div');
+      const isActive = o === this.active;
+      t.className = 'ticket' + (isActive ? ' is-active' : '');
+      t.style.setProperty('--tilt', (((o.id * 37) % 5) - 2) * 0.7 + 'deg');
+      t.innerHTML = `<span class="t-tag">${isActive ? 'Baking now' : 'Next'}</span>`
+        + `<span class="t-name">${RECIPE.name}</span>`
+        + `<span class="t-qty">×${o.qty}</span>`
+        + `<span class="t-need">${o.qty * RECIPE.ragi} ragi · ${o.qty * RECIPE.millet} millet${o.cut ? '<br>cut to fit your harvest' : ''}</span>`;
+      el.orders.appendChild(t);
+    });
+  },
+  timeUp() { this.baking = false; endStage(); },
+  exit() { hideQC(); this.baking = false; },
+};
+
+/* =====================================================================
+   10. STAGE 3 — DELIVER (canvas, 3-lane runner)
+   ===================================================================== */
+function drawAwning(g, cx, cy, s, ink, bg) {
+  const w = s * 1.6, h = s * 0.7;
+  for (let i = 0; i < 5; i++) { g.fillStyle = i % 2 ? bg : ink; g.fillRect(cx - w / 2 + (w / 5) * i, cy - h / 2, w / 5 + 0.5, h); }
+  g.fillStyle = ink;
+  for (let i = 0; i < 5; i++) { g.beginPath(); g.arc(cx - w / 2 + (w / 5) * (i + 0.5), cy + h / 2, w / 10, 0, Math.PI); g.fill(); }
+}
+function drawCart(g, cx, cy, s, ink) {
+  g.strokeStyle = ink; g.lineWidth = Math.max(1.6, s * 0.14); g.lineJoin = 'round'; g.lineCap = 'round';
+  g.beginPath();
+  g.moveTo(cx - s * 0.85, cy - s * 0.5); g.lineTo(cx - s * 0.55, cy - s * 0.5); g.lineTo(cx - s * 0.3, cy + s * 0.25);
+  g.lineTo(cx + s * 0.6, cy + s * 0.25); g.lineTo(cx + s * 0.75, cy - s * 0.3); g.lineTo(cx - s * 0.45, cy - s * 0.3);
+  g.stroke();
+  g.fillStyle = ink;
+  g.beginPath(); g.arc(cx - s * 0.18, cy + s * 0.5, s * 0.14, 0, Math.PI * 2); g.arc(cx + s * 0.48, cy + s * 0.5, s * 0.14, 0, Math.PI * 2); g.fill();
+}
+function drawBolt(g, cx, cy, s, ink) {
+  g.fillStyle = ink; g.beginPath();
+  g.moveTo(cx + s * 0.15, cy - s * 0.75); g.lineTo(cx - s * 0.45, cy + s * 0.1); g.lineTo(cx - s * 0.02, cy + s * 0.1);
+  g.lineTo(cx - s * 0.18, cy + s * 0.75); g.lineTo(cx + s * 0.45, cy - s * 0.12); g.lineTo(cx + s * 0.02, cy - s * 0.12);
+  g.closePath(); g.fill();
+}
+function drawCheck(g, cx, cy, s, color) {
+  g.strokeStyle = color; g.lineWidth = s * 0.22; g.lineCap = 'round'; g.lineJoin = 'round';
+  g.beginPath(); g.moveTo(cx - s * 0.45, cy); g.lineTo(cx - s * 0.1, cy + s * 0.35); g.lineTo(cx + s * 0.5, cy - s * 0.35); g.stroke();
+}
+function fitLabel(g, text, cx, cy, maxW, color) {
+  g.fillStyle = color; g.textAlign = 'center'; g.textBaseline = 'middle';
+  for (let size = 11; size >= 8; size -= 0.5) {
+    g.font = `700 ${size}px Hind, sans-serif`;
+    if (g.measureText(text).width <= maxW) { g.fillText(text, cx, cy); return; }
+  }
+  const parts = text.includes('-') ? [text.slice(0, text.indexOf('-') + 1), text.slice(text.indexOf('-') + 1)] : [text.slice(0, Math.ceil(text.length / 2)), text.slice(Math.ceil(text.length / 2))];
+  g.font = '700 9px Hind, sans-serif';
+  g.fillText(parts[0], cx, cy - 5.5); g.fillText(parts[1], cx, cy + 5.5);
+}
+function drawPad(g, cx, cy, w, h, store, done) {
+  const st = STORES[store];
+  g.save();
+  g.globalAlpha = done ? 0.5 : 1;
+  g.fillStyle = st.fill; roundRectPath(g, cx - w / 2, cy - h / 2, w, h, 10); g.fill();
+  g.setLineDash([5, 4]); g.lineWidth = 2; g.strokeStyle = 'rgba(255, 250, 238, .8)';
+  roundRectPath(g, cx - w / 2 + 4, cy - h / 2 + 4, w - 8, h - 8, 7); g.stroke(); g.setLineDash([]);
+  const iy = cy - h * 0.15, is = h * 0.24;
+  if (store === 'kirana') drawAwning(g, cx, iy, is, st.ink, st.fill);
+  else if (store === 'super') drawCart(g, cx, iy, is, st.ink);
+  else drawBolt(g, cx, iy, is, st.ink);
+  fitLabel(g, st.label, cx, cy + h * 0.26, w - 12, st.ink);
+  g.restore();
+  if (done) {
+    g.fillStyle = 'rgba(42, 61, 28, .85)'; g.beginPath(); g.arc(cx, cy - h * 0.05, h * 0.26, 0, Math.PI * 2); g.fill();
+    drawCheck(g, cx, cy - h * 0.05, h * 0.26, '#F0D38A');
+  }
+}
+function drawHole(g, cx, cy, w, h, seed) {
+  g.save(); g.translate(cx, cy);
+  g.fillStyle = '#6A6650'; g.beginPath();
+  for (let i = 0; i <= 12; i++) {
+    const a = (i / 12) * Math.PI * 2, rr = 1 + Math.sin(a * 3 + seed * 9) * 0.08;
+    const x = Math.cos(a) * w * 0.55 * rr, y = Math.sin(a) * h * 0.62 * rr;
+    if (i) g.lineTo(x, y); else g.moveTo(x, y);
+  }
+  g.closePath(); g.fill();
+  g.fillStyle = '#26251C'; g.beginPath(); g.ellipse(0, 0, w * 0.44, h * 0.48, 0, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = 'rgba(38, 37, 28, .6)'; g.lineWidth = 1.2;
+  for (let i = 0; i < 3; i++) {
+    const a = seed * 6 + i * 2.1;
+    g.beginPath(); g.moveTo(Math.cos(a) * w * 0.5, Math.sin(a) * h * 0.55); g.lineTo(Math.cos(a) * w * 0.78, Math.sin(a) * h * 0.85); g.stroke();
+  }
+  g.restore();
+}
+function drawTruck(g, x, y, w, h) {
+  g.save(); g.translate(x, y);
+  g.fillStyle = 'rgba(0, 0, 0, .25)'; roundRectPath(g, -w / 2 + 4, -h / 2 + 7, w, h, 8); g.fill();
+  g.fillStyle = '#1E2418';
+  const ww = w * 0.16, wh = h * 0.15;
+  [[-1, -0.3], [1, -0.3], [-1, 0.32], [1, 0.32]].forEach(([sx, sy]) => { roundRectPath(g, sx * (w / 2) - ww / 2, sy * h - wh / 2, ww, wh, 3); g.fill(); });
+  g.fillStyle = '#FFFAEE'; roundRectPath(g, -w / 2, -h * 0.18, w, h * 0.68, 6); g.fill();
+  g.strokeStyle = 'rgba(42, 61, 28, .25)'; g.lineWidth = 1; g.stroke();
+  g.fillStyle = '#4E6B2E'; g.fillRect(-w / 2, h * 0.3, w, h * 0.06);
+  g.fillStyle = '#2A3D1C'; g.font = `400 ${Math.round(w * 0.36)}px "Rozha One", Georgia, serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('IBP', 0, h * 0.13);
+  drawLeaf(g, 0, -h * 0.05, w * 0.1, '#4E6B2E');
+  g.fillStyle = '#4E6B2E'; roundRectPath(g, -w / 2 + 2, -h / 2, w - 4, h * 0.34, 8); g.fill();
+  g.fillStyle = '#CFE0C0'; roundRectPath(g, -w / 2 + 6, -h / 2 + h * 0.05, w - 12, h * 0.11, 4); g.fill();
+  g.fillStyle = '#F0D38A'; g.fillRect(-w / 2 + 5, -h / 2 + 1, 5, 3); g.fillRect(w / 2 - 10, -h / 2 + 1, 5, 3);
+  g.restore();
+}
+function drawDecor(g, d) {
+  if (d.kind === 'tree') {
+    const r = 13 * d.s;
+    g.fillStyle = 'rgba(42, 61, 28, .25)'; g.beginPath(); g.arc(d.x + 3, d.y + 4, r, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#4E6B2E'; g.beginPath(); g.arc(d.x, d.y, r, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#6F8C43'; g.beginPath(); g.arc(d.x - r * 0.3, d.y - r * 0.3, r * 0.55, 0, Math.PI * 2); g.fill();
+  } else {
+    const w = 26 * d.s, h = 20 * d.s;
+    g.fillStyle = 'rgba(42, 61, 28, .22)'; g.fillRect(d.x - w / 2 + 3, d.y - h / 2 + 3, w, h);
+    g.fillStyle = d.roof; g.fillRect(d.x - w / 2, d.y - h / 2, w, h);
+    g.fillStyle = 'rgba(255, 250, 238, .35)'; g.fillRect(d.x - w / 2, d.y - h / 2, w, h * 0.3);
+  }
+}
+
+const Deliver = {
+  lane: 1, x: 0, objs: [], decor: [], parts: [], floats: [],
+  t: 0, off: 0, slow: 0, shake: 0, padT: 0, holeT: 0, bag: [], noPackNote: false,
+  road: { x: 0, w: 0, laneW: 0 }, truck: { y: 0, w: 0, h: 0 },
+  layout() {
+    const r = this.road; r.w = W * 0.74; r.x = (W - r.w) / 2; r.laneW = r.w / 3;
+    const tr = this.truck; tr.w = r.laneW * 0.56; tr.h = tr.w * 1.75; tr.y = H * 0.8;
+    this.x = this.laneX(this.lane);
+  },
+  laneX(i) { return this.road.x + this.road.laneW * (i + 0.5); },
+  enter() {
+    showScene('canvas'); setPills(['packs', 'drops']);
+    this.lane = 1; this.layout();
+    this.objs = []; this.decor = []; this.parts = []; this.floats = [];
+    this.t = 0; this.off = 0; this.slow = 0; this.shake = 0; this.padT = 0.3; this.holeT = 0.9; this.bag = []; this.noPackNote = false;
+    for (let y = -H * 0.1; y < H + 40; y += rand(46, 80)) this.addDecor(y);
+    canvas.setAttribute('aria-label', 'Deliver. Swipe left or right, tap either side, or use the arrow keys to change lanes. Drive over the kirana, supermarket and quick-commerce pads. Avoid potholes.');
+  },
+  start() {},
+  addDecor(y) {
+    const left = Math.random() < 0.5, vw = this.road.x;
+    this.decor.push({
+      kind: Math.random() < 0.62 ? 'tree' : 'shop',
+      x: left ? rand(vw * 0.3, vw * 0.7) : W - rand(vw * 0.3, vw * 0.7),
+      y, s: rand(0.8, 1.15), roof: pick(['#C99A3B', '#A0452F', '#4E6B2E', '#EADDBC']),
+    });
+  },
+  speed() { const p = clamp(this.t / STAGES[2].dur, 0, 1); return H * lerp(0.5, 0.74, p) * (this.slow > 0 ? 0.55 : 1); },
+  nearestLane() {
+    let best = 0, bd = Infinity;
+    for (let i = 0; i < 3; i++) { const d = Math.abs(this.laneX(i) - this.x); if (d < bd) { bd = d; best = i; } }
+    return best;
+  },
+  nextStore() { if (!this.bag.length) this.bag = shuffle(['kirana', 'super', 'qcom']); return this.bag.pop(); },
+  spawnPad() {
+    const lw = this.road.laneW, h = lw * 0.74, y = -h;
+    const free = shuffle([0, 1, 2]).filter((l) => !this.objs.some((o) => o.kind === 'hole' && o.lane === l && Math.abs(o.y - y) < h * 2.2));
+    this.objs.push({ kind: 'pad', store: this.nextStore(), lane: free.length ? free[0] : (Math.random() * 3) | 0, y, h, w: lw * 0.84, done: false });
+  },
+  spawnHole() {
+    const lw = this.road.laneW, h = lw * 0.36, y = -h;
+    const free = shuffle([0, 1, 2]).filter((l) => !this.objs.some((o) => o.lane === l && Math.abs(o.y - y) < lw * 1.6));
+    if (!free.length) return;
+    this.objs.push({ kind: 'hole', lane: free[0], y, h, w: lw * 0.52, hit: false, seed: Math.random() });
+  },
+  move(dir) {
+    const n = clamp(this.lane + dir, 0, 2);
+    if (n !== this.lane) { this.lane = n; Sound.swish(); buzz(5); }
+  },
+  update(dt) {
+    this.t += dt;
+    this.slow = Math.max(0, this.slow - dt);
+    this.shake = Math.max(0, this.shake - dt * 3);
+    const v = this.speed();
+    this.off += v * dt;
+    this.padT -= dt; if (this.padT <= 0) { this.spawnPad(); this.padT = rand(1.1, 1.4); }
+    this.holeT -= dt; if (this.holeT <= 0) { this.spawnHole(); this.holeT = rand(0.55, 0.85); }
+    this.x += (this.laneX(this.lane) - this.x) * (1 - Math.pow(1e-8, dt));
+    for (const o of this.objs) o.y += v * dt;
+    for (const d of this.decor) d.y += v * dt;
+    this.decor = this.decor.filter((d) => d.y < H + 60);
+    let topY = this.decor.reduce((m, d) => Math.min(m, d.y), H);
+    while (topY > -40) { topY -= rand(46, 80); this.addDecor(topY); }
+    const tr = this.truck, cur = this.nearestLane();
+    const tTop = tr.y - tr.h / 2, tBot = tr.y + tr.h / 2;
+    for (const o of this.objs) {
+      if (o.lane !== cur) continue;
+      if (o.y + o.h / 2 < tTop + 6 || o.y - o.h / 2 > tBot - 6) continue;
+      if (o.kind === 'pad' && !o.done) this.deliver(o);
+      else if (o.kind === 'hole' && !o.hit) this.hitHole(o);
+    }
+    this.objs = this.objs.filter((o) => o.y - o.h / 2 < H + 20);
+    updateFx(this.parts, this.floats, dt);
+  },
+  deliver(o) {
+    o.done = true;
+    const st = STORES[o.store], fy = this.truck.y - this.truck.h * 0.85;
+    if (GameState.packs > 0) {
+      GameState.packs--; GameState.delivered[o.store]++; addScore(60);
+      Sound.ding(); buzz(12); popPill('drops');
+      floatText(this.floats, 'Delivered ✓', this.x, fy, 'ok');
+      burst(this.parts, this.x, this.truck.y - this.truck.h * 0.5, '#F0D38A', 10, true);
+      toast(`Delivered to ${st.name}`, 1000);
+    } else {
+      floatText(this.floats, 'No packs left', this.x, fy, 'bad');
+      if (!this.noPackNote) { this.noPackNote = true; toast('The truck is empty. Bake more next time.', 1400); }
+    }
+  },
+  hitHole(o) {
+    o.hit = true; GameState.potholes++; addScore(-20);
+    this.slow = 0.45; this.shake = 1;
+    Sound.thud(); buzz([30, 30, 30]);
+    floatText(this.floats, 'Pothole −20', this.x, this.truck.y - this.truck.h * 0.85, 'bad');
+  },
+  timeUp() { endStage(); },
+  render() {
+    const g = ctx, r = this.road;
+    const sx = this.shake > 0 && !REDUCED ? rand(-3, 3) * this.shake : 0;
+    const sy = this.shake > 0 && !REDUCED ? rand(-2, 2) * this.shake : 0;
+    g.save(); g.translate(sx, sy);
+    g.fillStyle = '#8DA567'; g.fillRect(-10, -10, W + 20, H + 20);
+    g.fillStyle = 'rgba(42, 61, 28, .08)';
+    const band = 26, o = this.off % (band * 2);
+    for (let y = -band * 2 + o; y < H + band; y += band * 2) { g.fillRect(-10, y, r.x + 10, band); g.fillRect(r.x + r.w, y, W - r.x - r.w + 10, band); }
+    for (const d of this.decor) drawDecor(g, d);
+    g.fillStyle = '#474D3C'; g.fillRect(r.x, -10, r.w, H + 20);
+    g.fillStyle = '#F2E7CB'; g.fillRect(r.x - 4, -10, 4, H + 20); g.fillRect(r.x + r.w, -10, 4, H + 20);
+    g.fillStyle = 'rgba(255, 250, 238, .55)';
+    const dl = 26, period = 48, oo = this.off % period;
+    for (let i = 1; i < 3; i++) { const lx = r.x + r.laneW * i - 2; for (let y = -period + oo; y < H + period; y += period) g.fillRect(lx, y, 4, dl); }
+    for (const ob of this.objs) if (ob.kind === 'hole') drawHole(g, this.laneX(ob.lane), ob.y, ob.w, ob.h, ob.seed);
+    for (const ob of this.objs) if (ob.kind === 'pad') drawPad(g, this.laneX(ob.lane), ob.y, ob.w, ob.h, ob.store, ob.done);
+    drawTruck(g, this.x, this.truck.y, this.truck.w, this.truck.h);
+    drawFx(g, this.parts, this.floats);
+    g.restore();
+  },
+};
+
+/* =====================================================================
+   11. STAGE 4 — FIRST BITE (camera with tap fallback)
+   ===================================================================== */
+const hasCamera = () => !!(navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function');
+const detectCanvas = document.createElement('canvas');
+detectCanvas.width = 48; detectCanvas.height = 36;
+const dctx = detectCanvas.getContext('2d', { willReadFrequently: true });
+
+const Bite = {
+  stream: null, done: false, samples: 0, base: 0, baseN: 0, prev: null, hits: 0, detectT: 0, openToken: 0,
+  enter() {
+    showScene('bite'); setPills([]);
+    this.done = false; this.samples = 0; this.base = 0; this.baseN = 0; this.prev = null; this.hits = 0; this.detectT = 0;
+    el.cam.hidden = true; el.tapBite.hidden = true; el.biteWait.hidden = true;
+    [el.camCookie, el.bigCookie].forEach((c) => c.classList.remove('is-bitten'));
+    el.crunchWord.classList.remove('is-on');
+    el.biteStage.style.setProperty('--p', '0');
+    const st = GameState.cameraStatus;
+    if ((st === 'granted' || st === 'unknown') && hasCamera()) this.openCamera();
+    else this.showFallback(st === 'off' ? 'off' : 'denied');
+  },
+  start() {},
+  async openCamera() {
+    const token = ++this.openToken;
+    el.biteWait.hidden = false;
+    el.biteSub.textContent = 'Starting your camera…';
+    const slow = setTimeout(() => { if (token === this.openToken && !this.stream && !this.done) this.showFallback('slow'); }, 1500);
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 320 }, height: { ideal: 240 } }, audio: false });
+      clearTimeout(slow);
+      if (token !== this.openToken || this.done || GameState.stageIndex !== 3) { s.getTracks().forEach((t) => t.stop()); return; }
+      this.stream = s;
+      GameState.cameraStatus = 'granted';
+      el.video.srcObject = s;
+      try { await el.video.play(); } catch (e) { /* autoplay of a muted stream normally works */ }
+      el.biteWait.hidden = true; el.tapBite.hidden = true; el.cam.hidden = false;
+      el.biteSub.textContent = 'Open wide for the first bite';
+      el.biteNote.textContent = 'Or tap the picture. Your camera stays on your phone; nothing is recorded or uploaded.';
+    } catch (e) {
+      clearTimeout(slow);
+      GameState.cameraStatus = 'denied';
+      if (token === this.openToken && !this.done) this.showFallback('denied');
+    }
+  },
+  showFallback(reason) {
+    el.cam.hidden = true; el.biteWait.hidden = true; el.tapBite.hidden = false;
+    el.biteSub.textContent = 'Tap the cookie to take the first bite';
+    el.biteNote.textContent = reason === 'off' ? 'Camera bite is switched off, so tap instead.'
+      : reason === 'slow' ? 'The camera is slow to start, so tap instead.'
+      : "The camera isn't available here, so tap instead.";
+  },
+  update(dt) {
+    el.biteStage.style.setProperty('--p', clamp(1 - GameState.stageTimeLeft / STAGES[3].dur, 0, 1).toFixed(3));
+    if (!this.stream || this.done) return;
+    this.detectT += dt;
+    if (this.detectT >= 0.09) { this.detectT = 0; this.detect(); }
+  },
+  /* Simple mouth-open detector: watch the patch under the face guide for a darker,
+     moving region (an open mouth) compared with a short baseline. */
+  detect() {
+    const v = el.video;
+    if (v.readyState < 2) return;
+    dctx.drawImage(v, 0, 0, 48, 36);
+    const d = dctx.getImageData(0, 0, 48, 36).data;
+    const x0 = 16, x1 = 32, y0 = 20, y1 = 30;
+    const roi = [];
+    let sum = 0;
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+      const i = (y * 48 + x) * 4, lum = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      roi.push(lum); sum += lum;
+    }
+    const mean = sum / roi.length;
+    let diff = 0;
+    if (this.prev) { for (let i = 0; i < roi.length; i++) diff += Math.abs(roi[i] - this.prev[i]); diff /= roi.length; }
+    this.prev = roi;
+    this.samples++;
+    if (this.samples <= 8) { this.base += mean; this.baseN++; return; }
+    const base = this.base / this.baseN;
+    const darker = mean < base * 0.8;
+    if ((darker && diff > 4) || diff > 28) this.hits++; else this.hits = Math.max(0, this.hits - 1);
+    if (this.hits >= 3) this.bite('camera');
+  },
+  tapBite() { if (GameState.phase === 'bite' && GameState.running) this.bite('tap'); },
+  bite(method) {
+    if (this.done) return;
+    this.done = true;
+    GameState.biteMethod = method;
+    GameState.running = false;
+    addScore(method === 'camera' ? 100 : method === 'tap' ? 60 : 30);
+    Sound.crunch(); buzz([12, 30, 12, 30, 20]);
+    const cookie = el.cam.hidden ? el.bigCookie : el.camCookie;
+    cookie.classList.add('is-bitten');
+    el.crunchWord.classList.add('is-on');
+    const c = centerOf(cookie);
+    spawnBits('crumb', 16, c.x + c.w * 0.3, c.y - c.h * 0.3, { spread: 90, dyMin: 30, dyMax: 150, life: 1000 });
+    announce('Crunch!');
+    this.stopCamera();
+    later(1150, () => finishGame());
+  },
+  timeUp() { this.bite('auto'); },
+  stopCamera() {
+    this.openToken++;
+    if (this.stream) { this.stream.getTracks().forEach((t) => t.stop()); this.stream = null; }
+    el.video.srcObject = null;
+  },
+};
+
+/* Optional camera check on the title screen, so the permission prompt never eats game time. */
+let skipCamera = null;
+async function precheckCamera() {
+  if (!GameState.cameraWanted) { GameState.cameraStatus = 'off'; return; }
+  if (!hasCamera()) { GameState.cameraStatus = 'denied'; return; }
+  el.startNote.textContent = 'Allow the camera if your browser asks.';
+  el.skipCamBtn.hidden = false;
+  const ask = navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+  const result = await Promise.race([
+    ask.then((s) => { s.getTracks().forEach((t) => t.stop()); return 'granted'; }, () => 'denied'),
+    new Promise((res) => setTimeout(() => res('timeout'), 9000)),
+    new Promise((res) => { skipCamera = () => res('skip'); }),
+  ]);
+  skipCamera = null;
+  el.skipCamBtn.hidden = true;
+  el.startNote.textContent = '';
+  if (result === 'granted') GameState.cameraStatus = 'granted';
+  else if (result === 'skip') { GameState.cameraStatus = 'off'; ask.then((s) => s.getTracks().forEach((t) => t.stop()), () => {}); }
+  else if (result === 'timeout') { GameState.cameraStatus = 'off'; ask.then((s) => s.getTracks().forEach((t) => t.stop()), () => {}); }
+  else {
+    GameState.cameraStatus = 'denied';
+    toast("The camera isn't available here, so you'll tap for the first bite.", 2200);
+  }
+}
+
+/* =====================================================================
+   12. STAGE MANAGER — one clock, four linked stages
+   ===================================================================== */
+const Stages = { harvest: Harvest, bake: Bake, deliver: Deliver, bite: Bite };
+
+function showScene(name) {
+  el.scene.classList.toggle('is-hidden', name !== 'canvas');
+  el.bake.hidden = name !== 'bake';
+  el.bite.hidden = name !== 'bite';
+  el.end.hidden = name !== 'end';
+}
+function setPills(list) { Object.keys(el.pills).forEach((k) => { el.pills[k].hidden = !list.includes(k); }); }
+
+function carryLine(id) {
+  const inv = GameState.inventory;
+  if (id === 'harvest') return 'A partner farm in Karnataka';
+  if (id === 'bake') {
+    const max = Math.max(0, Math.min(Math.floor(inv.ragi / RECIPE.ragi), Math.floor(inv.millet / RECIPE.millet)));
+    return `Your basket: ${inv.ragi} ragi · ${inv.millet} millet. That's ${plural(max, 'cookie')}.`;
+  }
+  if (id === 'deliver') return `${plural(GameState.packs, 'pack')} on the IBP truck`;
+  return 'From the farm, through the kitchen, to you';
+}
+
+let introDone = null;
+function showIntro(i, done) {
+  const st = STAGES[i];
+  el.introKicker.textContent = `Stage ${i + 1} of ${STAGES.length}`;
+  el.introTitle.textContent = st.name;
+  el.introTime.textContent = st.dur + 's';
+  el.introGoal.textContent = st.goal;
+  el.introCarry.textContent = carryLine(st.id);
+  const ms = DEMO ? 1300 : i === 0 ? 2600 : 2100;
+  el.intro.style.setProperty('--intro-ms', ms + 'ms');
+  el.intro.hidden = false;
+  el.intro.classList.remove('is-in'); void el.intro.offsetWidth; el.intro.classList.add('is-in');
+  Sound.whoosh();
+  announce(`Stage ${i + 1}, ${st.name}. ${st.dur} seconds. ${st.goal}`);
+  let finished = false;
+  const run = GameState.runId;
+  const go = () => {
+    if (finished || run !== GameState.runId) return;
+    finished = true; introDone = null;
+    clearTimeout(timer);
+    el.intro.classList.remove('is-in');
+    setTimeout(() => { if (!el.intro.classList.contains('is-in')) el.intro.hidden = true; }, 230);
+    done();
+  };
+  const timer = setTimeout(go, ms);
+  introDone = go;
+}
+
+function beginStage(i) {
+  const st = STAGES[i];
+  GameState.stageIndex = i;
+  GameState.stageTimeLeft = st.dur;
+  GameState.running = false;
+  GameState.phase = 'intro';
+  el.stageNum.textContent = String(i + 1);
+  el.stageName.textContent = st.name;
+  el.segs.forEach((s, k) => s.classList.toggle('is-now', k === i));
+  el.game.dataset.stage = st.id;
+  Stages[st.id].enter();
+  updateHud(true);
+  showIntro(i, () => {
+    GameState.phase = st.id;
+    GameState.running = true;
+    Stages[st.id].start();
+  });
+}
+
+function endStage() {
+  if (GameState.phase === 'end') return;
+  const i = GameState.stageIndex, st = STAGES[i];
+  GameState.running = false;
+  if (Stages[st.id].exit) Stages[st.id].exit();
+  if (i < STAGES.length - 1) beginStage(i + 1);
+  else finishGame();
+}
+
+function startGame() {
+  resetRun();
+  el.title.hidden = true;
+  el.sheet.hidden = true;
+  el.hud.hidden = false;
+  resizeCanvas();
+  beginStage(0);
+}
+
+function finishGame() {
+  GameState.running = false;
+  GameState.phase = 'end';
+  Bite.stopCamera();
+  el.hud.hidden = true;
+  el.intro.hidden = true;
+  showScene('end');
+  el.end.scrollTop = 0;
+  const s = GameState.score;
+  const rating = 1 + RATING_STEPS.filter((v) => s >= v).length;
+  const isBest = s > GameState.best;
+  if (isBest) { GameState.best = s; savePrefs(); }
+  el.rating.innerHTML = Array.from({ length: 5 }, (_, k) => `<svg viewBox="0 0 24 24" class="${k < rating ? 'on' : 'off'}" aria-hidden="true"><use href="#i-star"/></svg>`).join('');
+  el.rating.setAttribute('aria-label', `${rating} out of 5 stars`);
+  el.rating.dataset.rating = String(rating);
+  el.endScore.textContent = fmtNum(s);
+  el.endBest.textContent = isBest && s > 0 ? 'points · new best' : `points · best ${fmtNum(GameState.best)}`;
+  const h = GameState.harvest, b = GameState.bake, d = GameState.delivered;
+  el.statFarm.textContent = `${h.ragi} ragi · ${h.millet} millet` + (h.golden ? ` · ${h.golden} golden` : '');
+  el.statKitchen.textContent = `${plural(b.orders, 'order')} · ${plural(b.cookies, 'cookie')}` + (b.rejects ? ` · ${plural(b.rejects, 'QC reject')}` : '');
+  const drops = [];
+  if (d.kirana) drops.push(`${d.kirana} kirana`);
+  if (d.super) drops.push(`${d.super} supermarket`);
+  if (d.qcom) drops.push(`${d.qcom} quick-commerce`);
+  el.statRoad.textContent = drops.length ? drops.join(' · ') : 'No deliveries this time';
+  el.statYou.textContent = { camera: 'First bite, on camera', tap: 'First bite, by tap', auto: 'First bite, just in time' }[GameState.biteMethod] || 'First bite';
+  announce(`Finished. ${rating} out of 5 stars and ${s} points. Ragi and Millet, ragi from Karnataka, by IBP.`);
+}
+
+/* =====================================================================
+   13. END CARD — share and the ₹45 offer
+   ===================================================================== */
+let sheetReturn = null;
+function openSheet(title, html, returnTo) {
+  el.sheetTitle.textContent = title;
+  el.sheetBody.innerHTML = html;
+  el.sheet.hidden = false;
+  sheetReturn = returnTo || null;
+  el.sheetClose.focus({ preventScroll: true });
+}
+function closeSheet() {
+  el.sheet.hidden = true;
+  if (sheetReturn) sheetReturn.focus({ preventScroll: true });
+}
+function selectText(node) {
+  try { const r = document.createRange(); r.selectNodeContents(node); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } catch (e) { /* ignore */ }
+}
+function openOffer() {
+  openSheet('₹45 Trial Pack Offer', `
+    <div class="offer">
+      <span class="pouch" aria-hidden="true"><svg class="ico"><use href="#i-leaf"/></svg><span class="pouch-name">Nutrielle</span></span>
+      <div><p class="offer-name">Nutrielle Ragi &amp; Millet</p><p class="offer-meta">50g trial pack · ₹45</p></div>
+    </div>
+    <p class="sheet-p">Use this code at checkout on your quick-commerce app.</p>
+    <div class="code-row"><span class="offer-code" id="offerCode">${OFFER_CODE}</span><button class="btn btn-primary btn-small" id="copyCode" type="button">Copy code</button></div>
+    <p class="sheet-fine">Prototype for IBP's launch press conference. This is a demo offer, not a live promotion.</p>`, el.offerBtn);
+  onTap($('copyCode'), async () => {
+    try { await navigator.clipboard.writeText(OFFER_CODE); toast('Code copied'); }
+    catch (e) { selectText($('offerCode')); toast('Code selected. Copy it from here.'); }
+  });
+}
+async function shareScore() {
+  const rating = Number(el.rating.dataset.rating || 1);
+  const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  const url = location.href.split('#')[0];
+  const text = `I took Nutrielle's Ragi & Millet from a partner farm in Karnataka to my first bite in 60 seconds. ${stars} · ${fmtNum(GameState.score)} points. Taste it. Trace it. #FarmToFirstBite`;
+  try {
+    if (navigator.share) { await navigator.share({ title: 'Farm to First Bite', text, url }); return; }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(text + ' ' + url); toast('Copied. Paste it into WhatsApp or Instagram.', 1900); return; } catch (e) { /* fall through */ }
+  openSheet('Share your score', `<p class="sheet-p">Copy this and paste it anywhere:</p><textarea class="share-text" id="shareText" readonly>${escapeHtml(text + ' ' + url)}</textarea>`, el.shareBtn);
+  const ta = $('shareText'); ta.focus(); ta.select();
+}
+
+/* =====================================================================
+   14. HUD
+   ===================================================================== */
+const hudCache = {};
+function setText(node, key, val) { if (hudCache[key] !== val) { hudCache[key] = val; node.textContent = val; } }
+function updateHud(force) {
+  if (force) Object.keys(hudCache).forEach((k) => delete hudCache[k]);
+  if (GameState.stageIndex < 0 || GameState.phase === 'end') return;
+  setText(el.stageTime, 'st', String(Math.ceil(GameState.stageTimeLeft)));
+  setText(el.totalTime, 'tt', fmtTime(totalTimeLeft()));
+  setText(el.score, 'sc', fmtNum(GameState.score));
+  setText(el.invRagi, 'ir', String(GameState.inventory.ragi));
+  setText(el.invMillet, 'im', String(GameState.inventory.millet));
+  setText(el.starCount, 'so', String(GameState.bake.orders));
+  setText(el.packCount, 'pk', String(GameState.packs));
+  const d = GameState.delivered;
+  setText(el.dropCount, 'dr', String(d.kirana + d.super + d.qcom));
+  const elapsed = TOTAL_TIME - totalTimeLeft();
+  let start = 0;
+  STAGES.forEach((s, k) => {
+    const w = (clamp((elapsed - start) / s.dur, 0, 1) * 100).toFixed(1) + '%';
+    if (hudCache['seg' + k] !== w) { hudCache['seg' + k] = w; el.segFills[k].style.width = w; }
+    start += s.dur;
+  });
+  const low = GameState.running && GameState.stageTimeLeft <= 3;
+  if (hudCache.low !== low) { hudCache.low = low; el.stageTimeWrap.classList.toggle('is-low', low); }
+}
+
+/* =====================================================================
+   15. DEMO BOT (#demo) — plays the game for recording a clip
+   ===================================================================== */
+const Bot = {
+  cool: 0, laneCool: 0, burned: false,
+  update(dt) {
+    if (!GameState.running) return;
+    this.cool -= dt; this.laneCool -= dt;
+    const ph = GameState.phase;
+    if (ph === 'harvest') this.harvest();
+    else if (ph === 'bake') this.bake();
+    else if (ph === 'deliver') this.deliver();
+    else if (ph === 'bite' && GameState.stageTimeLeft < 3.4) Bite.tapBite();
+  },
+  harvest() {
+    const b = Harvest.basket, rim = b.y - b.h * 0.42, reachSpeed = 600;
+    let best = null, bestVal = -Infinity;
+    for (const it of Harvest.items) {
+      if (it.type === 'stone' || it.type === 'husk' || it.y > rim) continue;
+      const tLand = (rim - it.y) / it.vy;
+      if (Math.abs(it.x - b.x) / reachSpeed > tLand + 0.05) continue;
+      const inv = GameState.inventory;
+      const need = it.type === 'millet' ? (inv.millet <= inv.ragi ? 1.6 : 0.8) : it.type === 'golden' ? 3 : (inv.ragi <= inv.millet ? 1.6 : 0.8);
+      const val = need / (0.2 + tLand);
+      if (val > bestVal) { bestVal = val; best = it; }
+    }
+    let target = best ? best.x : W / 2;
+    for (const it of Harvest.items) {
+      if (it.type !== 'stone' && it.type !== 'husk') continue;
+      const tLand = (rim - it.y) / it.vy;
+      if (tLand > 0 && tLand < 0.45 && Math.abs(it.x - target) < b.w * 0.55) target += (it.x < target ? 1 : -1) * b.w * 0.75;
+    }
+    b.tx = clamp(target, b.w / 2 + 6, W - b.w / 2 - 6);
+  },
+  bake() {
+    if (this.cool > 0 || Bake.locked) return;
+    if (Bake.step === 0) { Bake.tapMill(); this.cool = 0.17; }
+    else if (Bake.step === 1) { const ok = Bake.chipOptions.find((o) => o.ok); if (ok) Bake.chooseIngredient(ok); this.cool = 0.32; }
+    else if (Bake.step === 2) {
+      if (!Bake.baking) { Bake.pressBake(); this.cool = 0.1; return; }
+      const [z0, z1] = Bake.zone;
+      const showQc = !this.burned && GameState.bake.orders === 1 && Bake.maxCookies() >= 3;   // burn one batch to show QC, if grain allows
+      if (showQc) { if (Bake.bakeP > z1 + 0.06) { this.burned = true; Bake.pressBake(); this.cool = 0.2; } }
+      else if (Bake.bakeP >= (z0 + z1) / 2) { Bake.pressBake(); this.cool = 0.25; }
+    } else if (Bake.step === 3) { Bake.tapPack(); this.cool = 0.3; }
+  },
+  deliver() {
+    if (this.laneCool > 0) return;
+    const D = Deliver, tr = D.truck, cur = D.lane;
+    const ahead = D.objs.filter((o) => o.y < tr.y - tr.h * 0.3);
+    const holeIn = (lane, y0, y1) => ahead.some((o) => o.kind === 'hole' && o.lane === lane && o.y > y0 && o.y < y1);
+    const pad = ahead.filter((o) => o.kind === 'pad' && !o.done).sort((a, b) => b.y - a.y)[0];
+    let want = cur;
+    if (pad && !holeIn(pad.lane, pad.y, tr.y)) want = pad.lane;
+    const near = tr.y - tr.h * 2.4;
+    if (holeIn(want, near, tr.y)) {
+      const alt = [0, 1, 2].filter((l) => !holeIn(l, near, tr.y)).sort((a, b) => Math.abs(a - cur) - Math.abs(b - cur))[0];
+      if (alt !== undefined) want = alt;
+    }
+    if (want !== cur) { D.move(want > cur ? 1 : -1); this.laneCool = 0.22; }
+  },
+};
+
+/* =====================================================================
+   16. INPUT
+   ===================================================================== */
+const touch = { x0: 0, y0: 0, active: false };
+function localX(clientX) { return clientX - el.playfield.getBoundingClientRect().left; }
+el.playfield.addEventListener('touchstart', (e) => {
+  const ph = GameState.phase;
+  if ((ph !== 'harvest' && ph !== 'deliver') || !GameState.running) return;
+  const t = e.changedTouches[0];
+  touch.x0 = t.clientX; touch.y0 = t.clientY; touch.active = true;
+  if (ph === 'harvest') Harvest.basket.tx = localX(t.clientX);
+  e.preventDefault();
+}, { passive: false });
+el.playfield.addEventListener('touchmove', (e) => {
+  const ph = GameState.phase;
+  if (ph !== 'harvest' && ph !== 'deliver') return;
+  e.preventDefault();
+  if (ph === 'harvest' && GameState.running) Harvest.basket.tx = localX(e.changedTouches[0].clientX);
+}, { passive: false });
+el.playfield.addEventListener('touchend', (e) => {
+  if (!touch.active) return;
+  touch.active = false;
+  if (GameState.phase !== 'deliver' || !GameState.running) return;
+  e.preventDefault();
+  const t = e.changedTouches[0], dx = t.clientX - touch.x0, dy = t.clientY - touch.y0;
+  if (Math.abs(dx) > 24 && Math.abs(dx) > Math.abs(dy) * 0.8) Deliver.move(dx > 0 ? 1 : -1);
+  else if (Math.abs(dx) < 14 && Math.abs(dy) < 14) Deliver.move(localX(t.clientX) < Deliver.x ? -1 : 1);
+}, { passive: false });
+
+/* Mouse and keyboard, for laptops and projectors. */
+const mouse = { x0: 0, down: false };
+el.playfield.addEventListener('mousemove', (e) => { if (GameState.phase === 'harvest' && GameState.running) Harvest.basket.tx = localX(e.clientX); });
+el.playfield.addEventListener('mousedown', (e) => { if (GameState.phase === 'deliver' && GameState.running) { mouse.x0 = e.clientX; mouse.down = true; } });
+window.addEventListener('mouseup', (e) => {
+  if (!mouse.down) return;
+  mouse.down = false;
+  if (GameState.phase !== 'deliver' || !GameState.running) return;
+  const dx = e.clientX - mouse.x0;
+  if (Math.abs(dx) > 24) Deliver.move(dx > 0 ? 1 : -1);
+  else Deliver.move(localX(e.clientX) < Deliver.x ? -1 : 1);
+});
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    const dir = e.key === 'ArrowLeft' ? -1 : 1;
+    if (dir < 0) Keys.left = true; else Keys.right = true;
+    if (GameState.phase === 'deliver' && GameState.running && !e.repeat) Deliver.move(dir);
+    if (GameState.phase === 'harvest' || GameState.phase === 'deliver') e.preventDefault();
+  } else if (e.key === 'Escape' && !el.sheet.hidden) closeSheet();
+});
+window.addEventListener('keyup', (e) => {
+  if (e.key === 'ArrowLeft') Keys.left = false;
+  if (e.key === 'ArrowRight') Keys.right = false;
+});
+
+/* Buttons. */
+let startBusy = false;
+onTap(el.startBtn, async () => {
+  if (startBusy) return;
+  startBusy = true;
+  Sound.init();
+  GameState.cameraWanted = el.camToggle.checked;
+  savePrefs();
+  if (GameState.cameraWanted && GameState.cameraStatus !== 'granted') await precheckCamera();
+  else if (!GameState.cameraWanted) GameState.cameraStatus = 'off';
+  startBusy = false;
+  startGame();
+});
+onTap(el.skipCamBtn, () => { if (skipCamera) skipCamera(); });
+el.camToggle.addEventListener('change', () => { GameState.cameraWanted = el.camToggle.checked; if (!GameState.cameraWanted) GameState.cameraStatus = 'off'; else if (GameState.cameraStatus === 'off') GameState.cameraStatus = 'unknown'; savePrefs(); });
+onTap(el.introGo, () => { if (introDone) introDone(); });
+onTap(el.muteBtn, () => { GameState.muted = !GameState.muted; applyPrefsToUI(); savePrefs(); if (!GameState.muted) { Sound.init(); Sound.tap(); } });
+onTap(el.millBtn, () => Bake.tapMill());
+onTap(el.bakeBtn, () => Bake.pressBake());
+onTap(el.packBtn, () => Bake.tapPack());
+onTap(el.tapBite, () => Bite.tapBite());
+onTap(el.cam, () => Bite.tapBite());
+onTap(el.offerBtn, () => openOffer());
+onTap(el.shareBtn, () => shareScore());
+onTap(el.againBtn, () => { Sound.init(); startGame(); });
+onTap(el.sheetClose, () => closeSheet());
+el.sheet.addEventListener('click', (e) => { if (e.target === el.sheet) closeSheet(); });
+
+/* Pause when the tab is hidden or the phone is turned sideways. */
+const landscape = window.matchMedia ? matchMedia('(orientation: landscape) and (max-height: 500px)') : null;
+function refreshPause() {
+  const wasPaused = GameState.paused;
+  GameState.paused = document.hidden || !!(landscape && landscape.matches);
+  if (GameState.paused && !wasPaused) Sound.suspend();
+  if (!GameState.paused && wasPaused) { Sound.resume(); lastT = performance.now(); }
+}
+document.addEventListener('visibilitychange', refreshPause);
+if (landscape) { if (landscape.addEventListener) landscape.addEventListener('change', refreshPause); else if (landscape.addListener) landscape.addListener(refreshPause); }
+
+/* =====================================================================
+   17. MAIN LOOP
+   ===================================================================== */
+let lastT = performance.now();
+function frame(now) {
+  const dt = clamp((now - lastT) / 1000, 0, 0.05);
+  lastT = now;
+  if (!GameState.paused) step(dt);
+  requestAnimationFrame(frame);
+}
+function step(dt) {
+  const st = STAGES[GameState.stageIndex];
+  if (GameState.running && st) {
+    GameState.stageTimeLeft = Math.max(0, GameState.stageTimeLeft - dt);
+    Stages[st.id].update(dt);
+    if (GameState.running && GameState.stageTimeLeft <= 0) Stages[st.id].timeUp();
+  } else if (GameState.phase === 'title') {
+    Ambient.update(dt);
+  }
+  if (DEMO) Bot.update(dt);
+  const scene = GameState.phase === 'title' ? 'farm' : st && st.id === 'harvest' ? 'farm' : st && st.id === 'deliver' ? 'road' : null;
+  if (scene === 'farm') Harvest.render();
+  else if (scene === 'road') Deliver.render();
+  updateHud();
+}
+
+/* =====================================================================
+   18. BOOT
+   ===================================================================== */
+let booted = false;
+function boot(saved) {
+  if (booted) return;
+  booted = true;
+  loadPrefs();
+  if (saved && typeof saved === 'object') {
+    if (typeof saved.best === 'number') GameState.best = Math.max(GameState.best, saved.best);
+    if (typeof saved.muted === 'boolean') GameState.muted = saved.muted;
+  }
+  applyPrefsToUI();
+  if (DEMO) { el.demoBadge.hidden = false; el.startBtn.textContent = 'Start demo · 60 seconds'; }
+  if (window.ResizeObserver) new ResizeObserver(() => resizeCanvas()).observe(el.playfield);
+  else window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { Harvest.bg = null; });
+  refreshPause();
+  requestAnimationFrame((t) => { lastT = t; requestAnimationFrame(frame); });
+}
+const hot = window.claude && window.claude.hot;
+try { if (hot && typeof hot.snapshot === 'function') hot.snapshot(() => ({ best: GameState.best, muted: GameState.muted })); } catch (e) { /* not in a viewer */ }
+if (hot && typeof hot.ready === 'function') hot.ready(boot);
+else boot((hot && hot.data) || {});
+})();
+</script>
+</body>
+</html>
