@@ -1,69 +1,79 @@
 # Farm to First Bite
 
-A 60-second phone game for **Nutrielle Ragi & Millet** by IBP. Players harvest ragi and millet on a partner farm in Karnataka, bake them into cookies, drive the packs to the shops and take the first bite. The game ends on a ₹45 trial-pack offer.
+A 60-second phone game for IBP's three biscuits. Players pick **Nutrielle**, **Molten Crave** or **Crème-O** and one of two flavours. Then they harvest its ingredients on a partner farm, bake past quality control, drive the packs to the shops, tear the pack open and take the first bite. The game ends on a trial-pack offer.
 
 It was made for IBP's launch press conference in *Baking a Strategic Mix 2026*, the Marketing Strategy & Innovation simulation in the GIM PGDM programme. A QR code on the event poster opens it on the audience's phones.
 
-![Title screen, harvest, kitchen and end card](screenshots/preview.jpg)
+**Play it:** https://kaushikkamat.github.io/IBP-W2/
 
-Once GitHub Pages is on, the game lives at `https://<your-username>.github.io/farm-to-first-bite/`. The steps are under [Put it online](#put-it-online).
+![The start screen in each brand's colours, and an end card](screenshots/preview.jpg)
+
+## Pick a biscuit
+
+Each choice changes the farm, the ingredients, the first kitchen step, the cookie, the pack and the colours of the whole game.
+
+| Biscuit | Flavour | Partner farm | You catch | Kitchen step 1 |
+| --- | --- | --- | --- | --- |
+| Nutrielle | Ragi & Millet | Karnataka | ragi and millet | Mill |
+| Nutrielle | Whole Wheat & Oats | Madhya Pradesh | wheat and oats | Mill |
+| Molten Crave | Choco Chip | Kerala | cocoa and wheat | Melt |
+| Molten Crave | Coconut | Tamil Nadu | coconut and cocoa | Grate |
+| Crème-O | Classic Vanilla | Kerala | vanilla and milk | Whip |
+| Crème-O | Chocolate | Karnataka | cocoa and milk | Whip |
 
 ## How it plays
 
-All four stages share one 60-second clock, and each stage feeds the next: the grain you catch is all the kitchen has to bake with, and every pack you seal rides on the truck.
+All four stages share one 60-second clock, and each stage feeds the next: what you catch is all the kitchen has to bake with, and every pack you seal rides on the truck.
 
 | Stage | Time | What you do |
 | --- | --- | --- |
-| 1. Harvest | 15 s | Slide your finger to move the basket and catch ragi and millet. Golden ragi counts as three. A stone knocks one ragi out; husk just costs points. |
-| 2. Bake | 30 s | Take each order through Mill, Mix, Bake and Pack, and pull the tray out while the marker is in the golden zone. An underbaked or burnt tray, or the wrong ingredient, gets the QC stamp: *"Only perfect cookies leave an IBP kitchen."* |
+| 1. Harvest | 15 s | Slide the basket to catch your flavour's two ingredients. A golden one counts as three. A stone knocks one out; husk just costs points. |
+| 2. Bake | 25 s | Take each order through four stations (Mill, Melt, Grate or Whip first, then Mix, Bake and Pack). Pull the tray out while the marker is in the golden zone. An underbaked or burnt tray, or the wrong ingredient, gets the QC stamp: *"Only perfect cookies leave an IBP kitchen."* |
 | 3. Deliver | 10 s | Swipe between three lanes. Drive over the Kirana, Supermarket and Quick-Commerce drops and miss the potholes. |
-| 4. First Bite | 5 s | Open wide at the camera, or tap, for the crunch. |
+| 4. Open & Bite | 10 s | Your pack arrives. Swipe from the scissors along the arrow to tear it open, and the camera opens: open wide, or tap, for the first bite. If the pack is still shut with 5 seconds left, it opens for you. |
 
-The end card reads **Ragi & Millet · ragi from Karnataka · by IBP** and shows a star rating, Share and the **₹45 Trial Pack Offer**.
+The end card reads like a label, for example **Ragi & Millet · ragi from Karnataka · by IBP**. It shows a star rating, Share, the brand's **Trial Pack Offer** (₹45 Nutrielle, ₹60 Molten Crave, ₹10 Crème-O) and a link to try another biscuit.
 
-![The QC stamp, the Mix station and the delivery run](screenshots/stages.jpg)
+![A Tamil Nadu coconut farm, the Crème-O kitchen, the pack with its tear arrow, a torn pack and the first bite](screenshots/stages.jpg)
 
-**Controls.** On a phone you slide, tap and swipe. On a laptop the mouse does the same jobs, and the arrow keys move the basket and the truck. The clock stops during each stage's intro card, while the tab is in the background and while the phone is turned sideways.
+**Controls.** On a phone you slide, tap and swipe. On a laptop the mouse does the same jobs, including dragging along the tear line, and the arrow keys move the basket and the truck. The clock stops during each stage's intro card, while the tab is in the background and while the phone is turned sideways.
 
 ### Scoring
 
 | Action | Points |
 | --- | --- |
-| Ragi or millet caught | +10 |
-| Golden ragi | +40 |
+| Ingredient caught | +10 |
+| Golden ingredient | +40 |
 | Stone / husk | −15 / −5 |
 | Order packed | +100 per cookie, plus 50 if packed within 6 s of starting it (25 within 9 s) |
 | Kitchen cleared early | +5 for each second left |
 | Pack delivered / pothole | +60 / −20 |
+| Pack torn open | +40 by swiping, +25 with the button |
 | First bite | +100 by camera, +60 by tap, +30 if time runs out |
 
 Everyone starts on one star and earns another at 400, 800, 1,200 and 1,600 points. The best score is kept on the phone.
 
-## Put it online
+## Update the live game
 
-The camera bite only works on a secure (https) page, and GitHub Pages gives you one for free.
+The site is served by GitHub Pages from the `main` branch, so the link and the poster's QR code never change.
 
-1. Create a new **public** repository on GitHub called `farm-to-first-bite`, without a README or licence. On a free account, Pages only works with public repositories.
-2. On the empty repository's page, click **uploading an existing file**. Drag in what's *inside* this folder (`index.html`, `README.md` and the `screenshots` folder), not the folder itself, so `index.html` sits at the top level. Click **Commit changes**.
-3. Open **Settings → Pages**. Under **Build and deployment**, set the source to **Deploy from a branch**, pick **main** and **/ (root)**, and click **Save**.
-4. After a few minutes the Pages settings show the live address, `https://<your-username>.github.io/farm-to-first-bite/`. Use that link for the poster's QR code.
+1. On the repository page, click **Add file → Upload files**.
+2. Drag in what's inside this folder (`index.html`, `README.md` and the `screenshots` folder). Files with the same names are replaced.
+3. Click **Commit changes**. The live game updates within a few minutes.
 
 Before the event, scan the QR with an iPhone and an Android phone over the venue Wi-Fi.
 
-If you'd rather use git:
+If you'd rather use git, from a clone of this repository:
 
 ```bash
-cd farm-to-first-bite
-git init -b main
-git add .
-git commit -m "Add Farm to First Bite"
-git remote add origin https://github.com/<your-username>/farm-to-first-bite.git
-git push -u origin main
+git add index.html README.md screenshots
+git commit -m "Pick a biscuit and tear open the pack"
+git push
 ```
 
 ## Record the press-conference clip
 
-Add `#demo` to the end of the address and the game plays itself. It catches grain, works the kitchen, burns one tray on purpose (when there's grain to spare) so the QC stamp shows, drives the route and takes the bite. Start a screen recording and press **Start demo**. Switch the camera off first if you'd rather keep your face out of the clip.
+Add `#demo` to the end of the address, pick a biscuit and press **Start demo**: the game plays itself. It catches ingredients, works the kitchen, burns one tray on purpose (when there's enough to spare) so the QC stamp shows, drives the route, tears the pack open and takes the bite. Switch the camera off first if you'd rather keep your face out of the clip.
 
 ## Run it on your computer
 
@@ -81,22 +91,22 @@ Everything lives in `index.html`. The settings you're most likely to change sit 
 
 | Constant | Controls |
 | --- | --- |
-| `STAGES` | Stage names, lengths in seconds and the goal line on each intro card |
-| `RECIPE` | The cookie's name and how much ragi and millet each cookie uses |
-| `DISTRACTORS` | The wrong ingredients offered at the Mix station |
+| `BRANDS` | Each biscuit's name, price, offer code and pack colours, and its two flavours: the farm, the local word on the sign, the two ingredients, the wrong options at the Mix station and the cookie's colours |
+| `ITEMS` | The ingredients the farms grow, with their words and colours |
+| `TOOLS` | The first kitchen station for each flavour: Mill, Melt, Grate or Whip |
+| `STAGES` | Stage names and lengths in seconds |
 | `STORES` | The three delivery stops |
 | `RATING_STEPS` | Points needed for two, three, four and five stars |
-| `OFFER_CODE` | The code shown with the ₹45 offer |
 
-It's plain HTML, CSS and JavaScript with no libraries. The farm and the road are drawn on a canvas, the kitchen and the end card are ordinary page elements, and every sound is synthesised with the Web Audio API, so there are no audio files. The only outside request is for Google Fonts (Rozha One, Hind and Kalam); offline, the game falls back to system fonts.
+It's plain HTML, CSS and JavaScript with no libraries. The farm and the road are drawn on a canvas, the kitchen, the pack and the end card are ordinary page elements, and every sound is synthesised with the Web Audio API, so there are no audio files. The only outside request is for Google Fonts (Rozha One, Hind and Kalam); offline, the game falls back to system fonts.
 
 ## Privacy and accessibility
 
-- The camera is optional. Players can switch it off on the title screen, and the game asks for permission before the clock starts.
+- The camera is optional. Players can switch it off on the start screen, and the game asks for permission before the clock starts.
 - To spot an open mouth, the game shrinks each camera frame to 48 × 36 pixels on the phone. Nothing is recorded, stored or uploaded, and the camera turns off right after the bite.
-- Only the best score and the sound and camera settings are saved, in the browser's local storage. There's no analytics or tracking.
-- The kitchen stations, the bite, the offer and Share are ordinary buttons, so they work with a keyboard and screen readers. Stage starts, QC rejects and the final score are read out to screen readers, and the game follows the phone's reduce-motion setting.
+- Only the best score, the last biscuit picked and the sound and camera settings are saved, in the browser's local storage. There's no analytics or tracking.
+- The biscuit and flavour picker uses ordinary radio buttons. The kitchen stations, the bite, the offer and Share are ordinary buttons, and "Can't swipe? Tap to open" opens the pack without a swipe. Stage starts, QC rejects and the final score are read out to screen readers, and the game follows the phone's reduce-motion setting.
 
 ## About
 
-IBP (Indian Biscuit Products Ltd) and Nutrielle are fictional brands from a classroom simulation. They have no link to any real company, and the ₹45 offer and its code are a demo, not a real promotion.
+IBP (Indian Biscuit Products Ltd), Nutrielle, Molten Crave and Crème-O are fictional brands from a classroom simulation. They have no link to any real company. The partner-farm states are part of the campaign story, not sourcing claims, and the offers and codes are a demo, not a real promotion.

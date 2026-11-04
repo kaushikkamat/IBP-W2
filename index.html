@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Farm to First Bite</title>
-<meta name="description" content="A 60-second Nutrielle by IBP mobile game: harvest ragi in Karnataka, bake perfect cookies past quality control, deliver them by truck, and take the first bite.">
+<meta name="description" content="A 60-second IBP mobile game: pick Nutrielle, Molten Crave or Crème-O, harvest its ingredients, bake past quality control, deliver by truck, tear open the pack and take the first bite.">
 <meta name="theme-color" content="#4E6B2E">
 <meta property="og:title" content="Farm to First Bite">
-<meta property="og:description" content="Take Nutrielle's ragi from a partner farm in Karnataka to your first bite in 60 seconds.">
+<meta property="og:description" content="Pick a biscuit, then take it from a partner farm to your first bite in 60 seconds.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%238F5530'/%3E%3Ccircle cx='22' cy='26' r='3' fill='%233E1E10'/%3E%3Ccircle cx='38' cy='40' r='3' fill='%233E1E10'/%3E%3Ccircle cx='40' cy='22' r='2.5' fill='%23E8C98C'/%3E%3Ccircle cx='24' cy='42' r='2.5' fill='%23E8C98C'/%3E%3Ccircle cx='54' cy='10' r='12' fill='%23F6EEDB'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,6 +42,19 @@
   :root:not([data-theme="light"]) { --page: #141B10; --page-ink: #D8DFC4; color-scheme: dark; }
 }
 :root[data-theme="dark"] { --page: #141B10; --page-ink: #D8DFC4; color-scheme: dark; }
+/* Each biscuit's journey wears its own pack colours. Nutrielle is the default above. */
+.game[data-brand="molten"] {
+  --cream: #F4E8DA; --cream-2: #E5D0B6; --paper: #FFF9F1;
+  --olive: #6E3B1E; --olive-deep: #2F1A0F; --olive-soft: #B4875A;
+  --gold: #C9A24B; --gold-soft: #EED593; --ragi: #8A3F1C;
+  --ink: #2F1A0F; --ink-2: #6F5643; --line: rgba(47, 26, 15, .16);
+}
+.game[data-brand="cremeo"] {
+  --cream: #F2EEE6; --cream-2: #DDD6C8; --paper: #FFFDF8;
+  --olive: #2C3F7C; --olive-deep: #16224A; --olive-soft: #8394C4;
+  --gold: #D3A23F; --gold-soft: #F2D58C; --ragi: #2C3F7C;
+  --ink: #16224A; --ink-2: #555F7E; --line: rgba(22, 34, 74, .16);
+}
 
 :root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 [hidden] { display: none !important; }
@@ -110,14 +123,31 @@ button { font: inherit; color: inherit; }
 
 /* ---------- Title ---------- */
 .title { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; justify-content: flex-end; }
-.title-card { display: grid; gap: 13px; max-height: 80%; overflow-y: auto; touch-action: pan-y; padding: 20px 20px 18px; background: var(--paper); border-radius: 24px 24px 0 0; box-shadow: 0 -12px 30px rgba(42, 61, 28, .14); }
+.title-card { display: grid; gap: 11px; max-height: 80%; overflow-y: auto; touch-action: pan-y; padding: 20px 20px 18px; background: var(--paper); border-radius: 24px 24px 0 0; box-shadow: 0 -12px 30px rgba(42, 61, 28, .14); }
 .brand { display: flex; align-items: center; gap: 8px; }
 .brand-name { display: inline-flex; align-items: center; gap: 5px; font: 400 21px/1 var(--font-display); color: var(--olive-deep); }
 .brand-name .ico { width: 18px; height: 18px; color: var(--olive); margin-bottom: 3px; }
 .brand-by { font: 700 10.5px/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--olive); }
 .demo-badge { margin-left: auto; font: 700 10px/1 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--paper); background: var(--qc); padding: 5px 8px 4px; border-radius: 999px; }
-.title-h { margin: 0; font: 400 clamp(34px, 11vw, 46px)/.98 var(--font-display); color: var(--olive-deep); text-wrap: balance; }
-.title-p { margin: 0; max-width: 34ch; font: 400 15.5px/1.45 var(--font-body); color: var(--ink-2); }
+.title-h { margin: 0; font: 400 clamp(30px, 9.6vw, 40px)/.98 var(--font-display); color: var(--olive-deep); text-wrap: balance; }
+.title-p { margin: 0; max-width: 36ch; font: 400 14.5px/1.42 var(--font-body); color: var(--ink-2); }
+.pick { display: grid; gap: 7px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.pick-label { padding: 0; margin: 0 0 1px; font: 700 10.5px/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-2); }
+.bcards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+.bcard, .fchip { position: relative; display: grid; min-width: 0; border-radius: 14px; border: 2px solid var(--line); background: var(--cream); cursor: pointer; transition: border-color .2s, background .2s, box-shadow .2s; }
+.bcard input, .fchip input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; margin: 0; pointer-events: none; }
+.bcard { --bc: var(--olive); --bcd: var(--olive-deep); justify-items: center; align-content: start; gap: 4px; padding: 10px 4px 8px; text-align: center; }
+.bcard .treat { width: 34px; margin-bottom: 2px; }
+.bcard b { font: 400 15px/1.05 var(--font-display); color: var(--bcd); }
+.bcard small { font: 600 10.5px/1.2 var(--font-body); color: var(--ink-2); }
+.bcard.is-on { border-color: var(--bc); background: var(--paper); box-shadow: 0 0 0 3px rgba(42, 61, 28, .14); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bc) 22%, transparent); }
+.fchips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.fchip { align-content: start; gap: 2px; padding: 9px 11px 8px; }
+.fchip b { font: 700 14px/1.15 var(--font-body); color: var(--olive-deep); }
+.fchip small { font: 600 11px/1.25 var(--font-body); color: var(--ink-2); }
+.fchip.is-on { border-color: var(--olive); background: var(--paper); box-shadow: 0 0 0 3px rgba(42, 61, 28, .14); box-shadow: 0 0 0 3px color-mix(in srgb, var(--olive) 18%, transparent); }
+.bcard:has(input:focus-visible), .fchip:has(input:focus-visible) { outline: 3px solid var(--gold); outline-offset: 2px; }
+.route-line { margin: 0; font: 600 12px/1.3 var(--font-body); color: var(--ink-2); text-align: center; }
 .route { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0; padding: 0; list-style: none; }
 .route li { display: grid; justify-items: center; gap: 2px; padding: 9px 2px 7px; border-radius: 12px; background: var(--cream); text-align: center; }
 .route .ico { width: 24px; height: 24px; }
@@ -140,7 +170,7 @@ button { font: inherit; color: inherit; }
 .btn-primary:active { box-shadow: 0 2px 0 var(--olive-deep); }
 .btn-offer { background: linear-gradient(180deg, var(--gold-soft), var(--gold)); color: var(--olive-deep); box-shadow: 0 5px 0 #96701F; font-size: 18px; min-height: 58px; }
 .btn-offer:active { box-shadow: 0 2px 0 #96701F; }
-.btn-ghost { background: transparent; color: var(--olive-deep); border: 2px solid rgba(42, 61, 28, .28); min-height: 48px; }
+.btn-ghost { background: transparent; color: var(--olive-deep); border: 2px solid rgba(42, 61, 28, .28); border-color: color-mix(in srgb, var(--olive-deep) 28%, transparent); min-height: 48px; }
 .btn-small { min-height: 40px; padding: 10px 14px 8px; font-size: 14px; }
 .btn-start { width: 100%; font-size: 18px; min-height: 58px; }
 
@@ -200,13 +230,20 @@ button { font: inherit; color: inherit; }
   transform: rotate(var(--turn)); transition: transform .28s cubic-bezier(.2, .8, .2, 1);
 }
 .millstone::after { content: ""; position: absolute; left: 50%; top: 8%; width: 9%; height: 9%; border-radius: 50%; background: #5E594D; transform: translateX(-50%); }
+/* The same tap-three-times station, dressed as a melting pot, a coconut scraper or a whisking bowl. */
+.millstone[data-tool="melt"] { background: repeating-conic-gradient(from 0deg, rgba(255, 220, 170, .16) 0 6deg, transparent 6deg 40deg), radial-gradient(circle, #6B3A1E 0 46%, #4A2412 47% 60%, #B9773E 61% 68%, #8C5426 69% 100%); box-shadow: inset 0 -6px 0 rgba(0, 0, 0, .18), 0 7px 0 #5C3418, 0 12px 18px rgba(47, 26, 15, .25); }
+.millstone[data-tool="melt"]::after { background: #F2D7B0; opacity: .7; }
+.millstone[data-tool="grate"] { background: repeating-conic-gradient(from 5deg, rgba(120, 90, 60, .2) 0 3deg, transparent 3deg 14deg), radial-gradient(circle, #FFFDF6 0 52%, #F1E8D6 53% 60%, #7A5232 61% 72%, #5E3D22 73% 100%); box-shadow: inset 0 -6px 0 rgba(0, 0, 0, .12), 0 7px 0 #4A2F1A, 0 12px 18px rgba(47, 26, 15, .22); }
+.millstone[data-tool="grate"]::after { background: #8A6A4A; }
+.millstone[data-tool="whip"] { background: repeating-conic-gradient(from 0deg, rgba(150, 140, 120, .22) 0 8deg, transparent 8deg 45deg), radial-gradient(circle, #FFFFFF 0 20%, #FFF6E6 21% 58%, #C9D2E6 59% 66%, #8A9AC2 67% 100%); box-shadow: inset 0 -6px 0 rgba(0, 0, 0, .1), 0 7px 0 #56648E, 0 12px 18px rgba(22, 34, 74, .22); }
+.millstone[data-tool="whip"]::after { background: #B9C2D8; }
 .tap-dots { display: flex; gap: 8px; }
 .tap-dots i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--olive); }
 .tap-dots i.on { background: var(--olive); }
 .bowl { position: relative; width: min(180px, 70%); aspect-ratio: 9 / 5; }
-.bowl::before { content: ""; position: absolute; inset: 0 0 auto; height: 36%; border-radius: 50%; background: #3F5A23; }
-.bowl-body { position: absolute; inset: 18% 0 0; border-radius: 0 0 50% 50% / 0 0 100% 100%; background: linear-gradient(180deg, #5C7C37, var(--olive)); box-shadow: inset 0 -8px 0 rgba(0, 0, 0, .12); }
-.dough { position: absolute; left: 14%; right: 14%; top: 6%; height: 26%; border-radius: 50%; background: radial-gradient(circle at 40% 40%, #B58763, #8D5D3E); }
+.bowl::before { content: ""; position: absolute; inset: 0 0 auto; height: 36%; border-radius: 50%; background: var(--olive-deep); }
+.bowl-body { position: absolute; inset: 18% 0 0; border-radius: 0 0 50% 50% / 0 0 100% 100%; background: linear-gradient(180deg, var(--olive-soft), var(--olive)); box-shadow: inset 0 -8px 0 rgba(0, 0, 0, .12); }
+.dough { position: absolute; left: 14%; right: 14%; top: 6%; height: 26%; border-radius: 50%; background: radial-gradient(circle at 40% 40%, var(--dough-hi, #B58763), var(--dough, #8D5D3E)); }
 .bowl.is-stirring .dough { animation: stir .55s ease-in-out; }
 .chips { display: flex; gap: 8px; width: 100%; }
 .chip { flex: 1 1 0; min-width: 0; min-height: 56px; display: grid; justify-items: center; align-content: center; gap: 4px; padding: 8px 4px 6px; border-radius: 14px; border: 2px solid rgba(42, 61, 28, .18); background: var(--paper); cursor: pointer; font: 700 13.5px/1.1 var(--font-body); color: var(--olive-deep); box-shadow: 0 3px 0 rgba(42, 61, 28, .15); }
@@ -216,8 +253,15 @@ button { font: inherit; color: inherit; }
 .ing-oats { background: radial-gradient(ellipse at 30% 50%, #F6E7C4 0 30%, transparent 32%), radial-gradient(ellipse at 70% 50%, #F6E7C4 0 30%, transparent 32%), #D9C49A; }
 .ing-almonds { background: radial-gradient(ellipse at 30% 50%, #9B6238 0 34%, transparent 36%), radial-gradient(ellipse at 72% 50%, #8A5530 0 34%, transparent 36%), #E3CFAE; }
 .ing-choco { background: radial-gradient(circle at 25% 50%, #3A2214 0 3px, transparent 3.5px), radial-gradient(circle at 60% 40%, #3A2214 0 3px, transparent 3.5px), radial-gradient(circle at 85% 60%, #3A2214 0 2.5px, transparent 3px), #E3CFAE; }
+.ing-ragi { background: radial-gradient(circle at 25% 50%, #4E2412 0 2.5px, transparent 3px), radial-gradient(circle at 55% 40%, #4E2412 0 2.5px, transparent 3px), radial-gradient(circle at 80% 58%, #4E2412 0 2.5px, transparent 3px), #8A4A2A; }
+.ing-wheat { background: radial-gradient(ellipse at 22% 50%, #F3D27E 0 26%, transparent 28%), radial-gradient(ellipse at 50% 45%, #F3D27E 0 26%, transparent 28%), radial-gradient(ellipse at 78% 52%, #F3D27E 0 26%, transparent 28%), #C9962E; }
+.ing-cocoa { background: radial-gradient(ellipse at 28% 50%, #5A2E16 0 30%, transparent 32%), radial-gradient(ellipse at 70% 50%, #5A2E16 0 30%, transparent 32%), #A8683A; }
+.ing-coconut { background: radial-gradient(ellipse at 30% 40%, #FFFDF5 0 22%, transparent 24%), radial-gradient(ellipse at 66% 60%, #FFFDF5 0 22%, transparent 24%), #E3D3B6; }
+.ing-vanilla { background: linear-gradient(168deg, transparent 0 40%, #3E2616 41% 57%, transparent 58%), #F6EBC8; }
+.ing-milk { background: radial-gradient(ellipse at 50% 32%, #FFFFFF 0 40%, transparent 42%), #DCE7F3; box-shadow: inset 0 0 0 1px rgba(62, 111, 176, .35); }
+.ing-jam { background: radial-gradient(circle at 35% 45%, #E7798A 0 18%, transparent 20%), #C0384B; }
 .ing-seeds { background: radial-gradient(ellipse at 22% 50%, #2E2A22 0 2px, transparent 2.5px), radial-gradient(ellipse at 48% 40%, #F3EBD7 0 2px, transparent 2.5px), radial-gradient(ellipse at 74% 58%, #2E2A22 0 2px, transparent 2.5px), #B9A882; }
-.oven { width: min(210px, 80%); aspect-ratio: 3 / 2; padding: 12px; border-radius: 22px; background: linear-gradient(180deg, #3F4E33, var(--olive-deep)); box-shadow: 0 8px 0 #1E2C14, 0 14px 22px rgba(42, 61, 28, .25); }
+.oven { width: min(210px, 80%); aspect-ratio: 3 / 2; padding: 12px; border-radius: 22px; background: linear-gradient(180deg, var(--olive), var(--olive-deep)); box-shadow: 0 8px 0 rgba(0, 0, 0, .45), 0 14px 22px rgba(42, 61, 28, .25); }
 .oven-window { height: 100%; display: grid; place-items: center; border-radius: 14px; background: radial-gradient(circle at 50% 62%, #F2B866 0 22%, #B4622C 64%, #6A3318 100%); box-shadow: inset 0 0 0 4px rgba(255, 255, 255, .08); transition: box-shadow .2s; }
 .bake-ui.in-zone .oven-window { box-shadow: inset 0 0 0 4px var(--gold-soft), 0 0 22px rgba(240, 211, 138, .7); }
 .bakebar { --p: 0%; --z0: 62%; --z1: 79%; position: relative; width: min(250px, 92%); height: 20px; border-radius: 10px; background: linear-gradient(90deg, #DCC7A2 0 var(--z0), var(--gold) var(--z0) var(--z1), #4A2E1B var(--z1) 100%); box-shadow: inset 0 2px 3px rgba(0, 0, 0, .18); }
@@ -257,27 +301,36 @@ button { font: inherit; color: inherit; }
 .cam { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; background: var(--olive-deep); box-shadow: 0 0 0 5px var(--paper); cursor: pointer; }
 .cam video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 .face-guide { position: absolute; left: 21%; right: 21%; top: 9%; bottom: 8%; border: 2px dashed rgba(255, 250, 238, .85); border-radius: 50%; }
-.cam-cookie { position: absolute; left: 50%; top: 66%; width: 30%; aspect-ratio: 1; margin-left: -15%; }
+.cam .cam-cookie { position: absolute; left: 50%; top: 62%; width: 30%; margin-left: -15%; }
 .tap-bite { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 10px; border: 0; background: none; border-radius: 50%; cursor: pointer; padding: 0; }
-.big-cookie { width: 72%; aspect-ratio: 1; animation: bob 1.4s ease-in-out infinite alternate; }
+.big-cookie { width: 70%; animation: bob 1.4s ease-in-out infinite alternate; }
+.big-cookie[data-look="sw"] { width: 60%; }
 .tap-label { font: 700 13px/1 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--olive); }
 .bite-wait { position: absolute; inset: 0; display: grid; place-items: center; font: 600 14px/1.3 var(--font-body); color: var(--ink-2); }
-.cookie {
-  --cookie: #8F5530; border-radius: 50%;
-  background:
-    radial-gradient(circle at 30% 26%, rgba(255, 238, 205, .42) 0 10%, transparent 28%),
-    radial-gradient(circle at 26% 62%, #3E1E10 0 3%, transparent 4%),
-    radial-gradient(circle at 58% 32%, #3E1E10 0 2.6%, transparent 3.6%),
-    radial-gradient(circle at 70% 64%, #3E1E10 0 3%, transparent 4%),
-    radial-gradient(circle at 44% 80%, #4A2614 0 2.4%, transparent 3.4%),
-    radial-gradient(circle at 80% 42%, #E8C98C 0 3%, transparent 4%),
-    radial-gradient(circle at 38% 46%, #E8C98C 0 2.5%, transparent 3.5%),
-    radial-gradient(circle at 62% 50%, #E8C98C 0 2%, transparent 3%),
-    var(--cookie);
-  box-shadow: inset 0 -6px 10px rgba(50, 24, 8, .3), inset 0 4px 6px rgba(255, 238, 205, .25), 0 8px 16px rgba(42, 61, 28, .25);
+/* ---------- The treat: whichever cookie or biscuit the player chose ---------- */
+.treat { --cookie: #8F5530; --cream-fill: #FFF4E0; position: relative; display: block; aspect-ratio: 1; }
+.treat i { position: absolute; display: block; border-radius: 50%; }
+.treat .t-top {
+  inset: 0; background: var(--tex, none), var(--cookie);
+  box-shadow: inset 0 -6px 10px rgba(50, 24, 8, .3), inset 0 4px 6px rgba(255, 238, 205, .25), 0 8px 16px rgba(42, 61, 28, .22);
 }
-.oven-cookie { width: 42%; aspect-ratio: 1; transition: transform .2s; }
-.oven-cookie.is-perfect { transform: scale(1.12); }
+.treat .t-base, .treat .t-cream, .treat .t-melt { display: none; }
+.treat[data-look="grain"] { --tex: radial-gradient(circle at 30% 26%, rgba(255, 238, 205, .42) 0 10%, transparent 28%), radial-gradient(circle at 26% 62%, #3E1E10 0 3%, transparent 4%), radial-gradient(circle at 58% 32%, #3E1E10 0 2.6%, transparent 3.6%), radial-gradient(circle at 70% 64%, #3E1E10 0 3%, transparent 4%), radial-gradient(circle at 44% 80%, #4A2614 0 2.4%, transparent 3.4%), radial-gradient(circle at 80% 42%, #E8C98C 0 3%, transparent 4%), radial-gradient(circle at 38% 46%, #E8C98C 0 2.5%, transparent 3.5%), radial-gradient(circle at 62% 50%, #E8C98C 0 2%, transparent 3%); }
+.treat[data-look="oat"] { --tex: radial-gradient(circle at 30% 26%, rgba(255, 238, 205, .4) 0 10%, transparent 28%), radial-gradient(ellipse 9% 5% at 30% 58%, #F1E2BD 0 70%, transparent 100%), radial-gradient(ellipse 8% 5% at 60% 30%, #F1E2BD 0 70%, transparent 100%), radial-gradient(ellipse 9% 5% at 68% 66%, #EBD9AE 0 70%, transparent 100%), radial-gradient(ellipse 7% 4% at 44% 80%, #F1E2BD 0 70%, transparent 100%), radial-gradient(ellipse 7% 4% at 80% 46%, #EBD9AE 0 70%, transparent 100%), radial-gradient(circle at 46% 46%, #6B4423 0 2.2%, transparent 3.2%), radial-gradient(circle at 24% 40%, #6B4423 0 2%, transparent 3%); }
+.treat[data-look="chip"] { --tex: radial-gradient(circle at 30% 26%, rgba(255, 238, 205, .4) 0 10%, transparent 28%), radial-gradient(circle at 28% 60%, #2E160B 0 6%, transparent 7%), radial-gradient(circle at 60% 30%, #2E160B 0 5.5%, transparent 6.5%), radial-gradient(circle at 70% 66%, #2E160B 0 6%, transparent 7%), radial-gradient(circle at 46% 82%, #3A1C0E 0 4.5%, transparent 5.5%), radial-gradient(circle at 46% 48%, #3A1C0E 0 4%, transparent 5%), radial-gradient(circle at 82% 44%, #2E160B 0 4%, transparent 5%); }
+.treat[data-look="coconut"] { --tex: radial-gradient(circle at 30% 26%, rgba(255, 238, 205, .4) 0 10%, transparent 28%), radial-gradient(ellipse 8% 3% at 30% 56%, #FFF8EA 0 70%, transparent 100%), radial-gradient(ellipse 7% 3% at 58% 30%, #FFF8EA 0 70%, transparent 100%), radial-gradient(ellipse 8% 3% at 66% 62%, #FFF8EA 0 70%, transparent 100%), radial-gradient(ellipse 6% 3% at 44% 80%, #FFF8EA 0 70%, transparent 100%), radial-gradient(ellipse 6% 3% at 78% 40%, #FFF8EA 0 70%, transparent 100%), radial-gradient(circle at 46% 46%, #2E160B 0 4%, transparent 5%), radial-gradient(circle at 74% 78%, #2E160B 0 3.5%, transparent 4.5%); }
+/* Sandwich biscuit (Crème-O): top biscuit, the cream layer and the bottom biscuit peeking out below. */
+.treat[data-look="sw"] { aspect-ratio: 1 / 1.12; --tex: radial-gradient(circle at 30% 26%, rgba(255, 238, 205, .35) 0 9%, transparent 26%), radial-gradient(circle, transparent 0 27%, rgba(0, 0, 0, .16) 28% 30.5%, transparent 31.5%), radial-gradient(circle, transparent 0 41%, rgba(0, 0, 0, .12) 42% 44%, transparent 45%), repeating-conic-gradient(rgba(0, 0, 0, .1) 0 5deg, transparent 5deg 30deg); }
+.treat[data-look="sw"] .t-top { inset: 0 0 auto; height: 89.3%; }
+.treat[data-look="sw"] .t-cream { display: block; left: 2.5%; right: 2.5%; top: 5.4%; height: 89.3%; background: var(--cream-fill); box-shadow: inset 0 -3px 5px rgba(0, 0, 0, .1); }
+.treat[data-look="sw"] .t-base { display: block; left: 0; right: 0; top: 10.7%; height: 89.3%; background: var(--cookie); box-shadow: inset 0 -6px 10px rgba(30, 14, 4, .35), 0 8px 14px rgba(42, 61, 28, .22); }
+/* Molten Crave: the first bite shows the molten chocolate centre. */
+.treat[data-melt].is-bitten .t-melt { display: block; left: 50%; top: 9%; width: 32%; height: 30%; border-radius: 46% 54% 52% 48% / 40% 44% 56% 60%; background: radial-gradient(ellipse at 38% 30%, #A0582C 0 14%, #5A2A12 45%, #3A1A0A 100%); box-shadow: 0 2px 4px rgba(0, 0, 0, .25); }
+.oven-treat { width: 42%; transition: transform .2s; }
+.oven-treat[data-look="sw"] { aspect-ratio: 1; }
+.oven-treat .t-top { inset: 0 !important; height: auto !important; }
+.oven-treat .t-cream, .oven-treat .t-base { display: none !important; }
+.oven-treat.is-perfect { transform: scale(1.12); }
 .is-bitten {
   -webkit-mask: radial-gradient(circle at 90% 12%, transparent 0 25%, #000 26%), radial-gradient(circle at 66% 0%, transparent 0 17%, #000 18%);
   -webkit-mask-composite: source-in;
@@ -288,6 +341,45 @@ button { font: inherit; color: inherit; }
 .crunch-word.is-on { animation: crunchword .9s cubic-bezier(.2, 1.3, .4, 1) forwards; }
 .bite-note { margin: 0; max-width: 32ch; font: 500 12.5px/1.4 var(--font-body); color: var(--ink-2); text-wrap: balance; }
 
+/* ---------- Open the pack ---------- */
+.tear { display: grid; justify-items: center; gap: 8px; width: 100%; }
+.tear-pack {
+  --tp: 0; --pk: #4E6B2E; --pk-deep: #2A3D1C; --pk-label: #FFFAEE; --pk-ink: #2A3D1C; --pk-accent: #C99A3B;
+  position: relative; width: min(210px, 58%, 31vh); aspect-ratio: 4 / 5.2; margin-top: 16px; touch-action: none; cursor: grab;
+}
+.tp-body {
+  position: absolute; left: 0; right: 0; top: 22.5%; bottom: 0; display: grid; justify-items: center; align-content: center; gap: 2px; padding: 10% 8% 16%;
+  border-radius: 0 0 18px 18px; text-align: center;
+  background: repeating-linear-gradient(90deg, rgba(0, 0, 0, .14) 0 3px, transparent 3px 8px) bottom / 100% 7% no-repeat, linear-gradient(180deg, var(--pk) 0 9%, var(--pk-label) 9% 74%, var(--pk) 74% 100%);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08), 0 16px 26px rgba(20, 30, 12, .28);
+}
+.tp-top {
+  position: absolute; left: 0; right: 0; top: 0; height: 23%; border-radius: 14px 14px 0 0; transform-origin: 92% 100%;
+  background: repeating-linear-gradient(90deg, rgba(0, 0, 0, .16) 0 3px, transparent 3px 8px) top / 100% 30% no-repeat, var(--pk);
+  transition: transform .55s cubic-bezier(.3, 1.3, .5, 1), opacity .5s ease;
+}
+.tear-label { position: absolute; left: 0; right: 0; bottom: 26%; font: 700 9px/1 var(--font-body); letter-spacing: .22em; color: rgba(255, 250, 238, .85); text-align: center; }
+.tp-mark { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--pk); color: var(--pk-label); }
+.tp-mark .ico { width: 16px; height: 16px; }
+.tp-name { font: 400 clamp(18px, 6.2vw, 24px)/1 var(--font-display); color: var(--pk-ink); }
+.tp-by { font: 700 7.5px/1 var(--font-body); letter-spacing: .18em; color: var(--pk-accent); }
+.tp-var { margin-top: 4px; font: 700 13px/1.15 var(--font-body); color: var(--pk-ink); text-wrap: balance; }
+.tp-size { position: absolute; left: 0; right: 0; bottom: 8%; font: 700 10.5px/1 var(--font-body); letter-spacing: .06em; color: var(--pk-label); }
+.tear-line { position: absolute; left: 8%; right: 14%; top: 22.5%; height: 0; border-top: 2.5px dashed rgba(255, 250, 238, .95); }
+.tear-cut { position: absolute; left: 0; top: -4.2px; height: 6px; width: calc(var(--tp) * 100%); border-radius: 3px; background: var(--pk-deep); box-shadow: 0 1px 0 rgba(255, 255, 255, .35); }
+.tear-sc { position: absolute; top: -1px; left: calc(var(--tp) * 100%); width: 32px; height: 32px; margin: -16px 0 0 -16px; display: grid; place-items: center; border-radius: 50%; background: var(--paper); color: var(--pk-deep); box-shadow: 0 3px 8px rgba(0, 0, 0, .28); }
+.tear-sc .ico { width: 20px; height: 20px; }
+.tear-arrow { position: absolute; right: -30px; top: -1px; width: 28px; height: 28px; margin-top: -14px; color: var(--pk-accent); filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .35)); animation: nudge .9s ease-in-out infinite alternate; }
+.tear-hand { position: absolute; top: -1px; left: 0; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: rgba(255, 250, 238, .92); box-shadow: 0 0 0 6px rgba(255, 250, 238, .3); pointer-events: none; animation: tearhint 1.6s ease-in-out infinite; }
+.tear-pack.is-tearing .tear-hand, .tear-pack.is-open .tear-hand { display: none; }
+.tear-pack.is-nudge .tear-arrow { animation: nudge .18s ease-in-out 4 alternate; }
+.tear-pack.is-open .tp-top { transform: translate(30%, -80%) rotate(26deg); opacity: 0; }
+.tear-pack.is-open .tear-line { opacity: 0; transition: opacity .2s; }
+.tp-treat { position: absolute; left: 50%; top: 14%; width: 46%; opacity: 0; transform: translate(-50%, 20%) scale(.6); pointer-events: none; }
+.tear-pack.is-open .tp-treat { animation: popout .6s cubic-bezier(.2, 1.3, .4, 1) .08s forwards; }
+.tear-alt { font-size: 12.5px; }
+.bite-stage.is-in { animation: camIn .42s cubic-bezier(.2, 1.25, .4, 1); }
+
 /* ---------- End card ---------- */
 .end { position: absolute; inset: 0; z-index: 12; overflow-y: auto; touch-action: pan-y; background: radial-gradient(circle at 50% 0%, var(--paper), var(--cream) 55%); }
 .end-inner { display: grid; gap: 14px; padding: 22px 18px 24px; }
@@ -296,10 +388,10 @@ button { font: inherit; color: inherit; }
 .label-kicker { font: 700 10px/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--olive); }
 .label-line { margin: 7px 0 8px; font: 700 17px/1.3 var(--font-body); color: var(--olive-deep); }
 .label-route { display: grid; gap: 1px; font: 400 15px/1.3 var(--font-hand); color: var(--ragi); }
-.stamp { position: absolute; right: 12px; top: 12px; width: 70px; height: 82px; display: grid; place-content: center; gap: 3px; padding: 6px 4px; border-radius: 4px; background: var(--olive); color: var(--paper); text-align: center; transform: rotate(4deg); outline: 2px dashed rgba(255, 250, 238, .75); outline-offset: -6px; }
+.stamp { position: absolute; right: 12px; top: 12px; width: 70px; min-height: 82px; display: grid; place-content: center; gap: 3px; padding: 6px 4px; border-radius: 4px; background: var(--olive); color: var(--paper); text-align: center; transform: rotate(4deg); outline: 2px dashed rgba(255, 250, 238, .75); outline-offset: -6px; }
 .stamp b { font: 400 17px/1 var(--font-display); letter-spacing: .04em; }
-.stamp span { font: 600 15px/1 "Noto Sans Kannada", "Kannada Sangam MN", "Nirmala UI", "Tunga", sans-serif; }
-.stamp small { font: 700 7px/1 var(--font-body); letter-spacing: .14em; }
+.stamp span { font: 600 15px/1.1 "Noto Sans Kannada", "Kannada Sangam MN", "Nirmala UI", "Tunga", sans-serif; }
+.stamp small { font: 700 7px/1.25 var(--font-body); letter-spacing: .14em; }
 .rating-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .rating { display: flex; gap: 4px; }
 .rating svg { width: 34px; height: 34px; }
@@ -312,6 +404,7 @@ button { font: inherit; color: inherit; }
 .stats span { font: 700 10.5px/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--olive); }
 .stats b { min-width: 0; font: 600 14.5px/1.35 var(--font-body); color: var(--ink); }
 .end-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.end-pick { justify-self: center; margin-top: -2px; }
 
 /* ---------- Sheet ---------- */
 .sheet-backdrop { position: absolute; inset: 0; z-index: 50; display: flex; align-items: flex-end; background: rgba(20, 30, 12, .5); }
@@ -332,7 +425,7 @@ button { font: inherit; color: inherit; }
 /* ---------- DOM particles ---------- */
 .bit { position: absolute; width: 7px; height: 7px; border-radius: 2px; animation: bit .85s cubic-bezier(.2, .7, .3, 1) forwards; }
 .flour { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: #EDE2CC; animation: bit .6s ease-out forwards; }
-.crumb { position: absolute; width: 7px; height: 6px; border-radius: 40%; background: #7C4727; animation: bit .95s cubic-bezier(.2, .6, .4, 1) forwards; }
+.crumb { position: absolute; width: 7px; height: 6px; border-radius: 40%; background: var(--crumb, #7C4727); animation: bit .95s cubic-bezier(.2, .6, .4, 1) forwards; }
 
 .rotate { display: none; }
 @media (orientation: landscape) and (max-height: 500px) {
@@ -350,6 +443,10 @@ button { font: inherit; color: inherit; }
 @keyframes crunchword { 0% { opacity: 0; transform: translateX(-50%) scale(.6) rotate(-6deg); } 30% { opacity: 1; transform: translateX(-50%) scale(1.1) rotate(-6deg); } 100% { opacity: 0; transform: translateX(-50%) translateY(-24px) scale(1) rotate(-6deg); } }
 @keyframes bit { to { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; } }
 @keyframes sheetIn { from { transform: translateY(30px); opacity: 0; } }
+@keyframes tearhint { 0% { left: 2%; opacity: 0; } 15% { opacity: 1; } 75% { left: 96%; opacity: 1; } 100% { left: 100%; opacity: 0; } }
+@keyframes nudge { to { transform: translateX(5px); } }
+@keyframes popout { to { transform: translate(-50%, -72%) scale(1); opacity: 1; } }
+@keyframes camIn { from { transform: translateY(26%) scale(.55); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .intro.is-in .intro-bar span { animation-duration: var(--intro-ms, 2000ms) !important; }
@@ -369,6 +466,15 @@ button { font: inherit; color: inherit; }
   <symbol id="i-mute" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 9.5l5 5m0-5l-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
   <symbol id="i-oven" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3" fill="currentColor"/><rect x="6" y="9" width="12" height="8" rx="1.5" fill="#F0D38A"/><circle cx="7" cy="6.5" r="1" fill="#FFFAEE"/><circle cx="10" cy="6.5" r="1" fill="#FFFAEE"/></symbol>
   <symbol id="i-cookie" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10 3.5 3.5 0 0 1-3.6-3.4A3.5 3.5 0 0 1 14.6 5 3 3 0 0 1 12 2z"/><circle cx="8" cy="11" r="1.3" fill="#FFFAEE"/><circle cx="12" cy="16" r="1.3" fill="#FFFAEE"/><circle cx="16" cy="14" r="1.1" fill="#FFFAEE"/></symbol>
+  <symbol id="i-wheat" viewBox="0 0 24 24"><path d="M12 22V9" stroke="#8A6A2A" stroke-width="1.6" stroke-linecap="round" fill="none"/><g fill="currentColor"><ellipse cx="12" cy="4.2" rx="1.7" ry="2.6"/><ellipse cx="9.4" cy="7.4" rx="1.6" ry="2.5" transform="rotate(-28 9.4 7.4)"/><ellipse cx="14.6" cy="7.4" rx="1.6" ry="2.5" transform="rotate(28 14.6 7.4)"/><ellipse cx="9.4" cy="11.2" rx="1.6" ry="2.5" transform="rotate(-28 9.4 11.2)"/><ellipse cx="14.6" cy="11.2" rx="1.6" ry="2.5" transform="rotate(28 14.6 11.2)"/><ellipse cx="9.6" cy="15" rx="1.5" ry="2.3" transform="rotate(-28 9.6 15)"/><ellipse cx="14.4" cy="15" rx="1.5" ry="2.3" transform="rotate(28 14.4 15)"/></g></symbol>
+  <symbol id="i-oats" viewBox="0 0 24 24"><path d="M12 22c0-7 0-11 1-17" stroke="#8C7A4E" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M12.6 8c-2 1-3.5 2.6-4.4 4.6M12.4 12c2 .8 3.6 2.3 4.6 4.2M12.2 15.5c-1.7.9-2.9 2.2-3.6 3.8" stroke="#8C7A4E" stroke-width="1.1" fill="none" stroke-linecap="round"/><g fill="currentColor"><ellipse cx="13.2" cy="4.2" rx="1.5" ry="2.4"/><ellipse cx="7.8" cy="13.6" rx="1.4" ry="2.3" transform="rotate(20 7.8 13.6)"/><ellipse cx="17.2" cy="17.2" rx="1.4" ry="2.3" transform="rotate(-20 17.2 17.2)"/><ellipse cx="8.2" cy="20" rx="1.3" ry="2.1" transform="rotate(20 8.2 20)"/></g></symbol>
+  <symbol id="i-cocoa" viewBox="0 0 24 24"><path d="M12 1.5v3" stroke="#5E3B1E" stroke-width="1.6" stroke-linecap="round"/><path fill="currentColor" d="M12 4c4.2 0 6.4 4 6.4 8.4S16.2 22 12 22s-6.4-5.2-6.4-9.6S7.8 4 12 4z"/><path d="M9.2 6.4c-.8 4-.8 8.4.4 13.2M12 4.4v17.4M14.8 6.4c.8 4 .8 8.4-.4 13.2" stroke="rgba(0,0,0,.28)" stroke-width="1" fill="none"/></symbol>
+  <symbol id="i-coconut" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.6" fill="currentColor"/><path d="M6 9.5c2-1.2 4-1.6 6-1.6M7.5 18c2.6 1 5.8 1 8.8-.4M5.2 13.6c3 .6 7 .6 12.6-.8" stroke="rgba(255,236,200,.35)" stroke-width="1" fill="none"/><g fill="#2A1A0E"><circle cx="10" cy="8.2" r="1.1"/><circle cx="13.6" cy="8.2" r="1.1"/><circle cx="11.8" cy="10.6" r="1.1"/></g></symbol>
+  <symbol id="i-vanilla" viewBox="0 0 24 24"><g fill="#E9E19C"><ellipse cx="16.6" cy="4.4" rx="1.6" ry="2.8" transform="rotate(30 16.6 4.4)"/><ellipse cx="19.4" cy="7" rx="1.6" ry="2.8" transform="rotate(100 19.4 7)"/><ellipse cx="14.4" cy="7.6" rx="1.6" ry="2.6" transform="rotate(-40 14.4 7.6)"/></g><circle cx="16.8" cy="6.6" r="1.2" fill="#C9B54A"/><path d="M15 8.6c-4 3-6.6 7.4-8.6 13" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M16.4 10c-3 3.4-5 7.4-6.2 12" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".8"/></symbol>
+  <symbol id="i-milk" viewBox="0 0 24 24"><rect x="8.5" y="2.2" width="7" height="2.6" rx="1" fill="#7E8B96"/><path fill="currentColor" d="M9 4.6h6v2.2c2.6 1 3.6 2.8 3.6 5.4v7.2a2.4 2.4 0 0 1-2.4 2.4H7.8a2.4 2.4 0 0 1-2.4-2.4v-7.2c0-2.6 1-4.4 3.6-5.4z"/><rect x="5.4" y="13" width="13.2" height="3.4" fill="#3E6FB0"/><path d="M8 9.4c.4-1 1.2-1.6 2.2-2" stroke="rgba(255,255,255,.7)" stroke-width="1.1" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="i-drip" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.5c4.6 0 8.5 2.6 8.5 6.2 0 1.6-.9 2.6-2.2 2.6-1 0-1.6-.6-1.6-.6v1.8c0 1.2-.9 2.1-2 2.1s-2-.9-2-2.1v-.6v6.2c0 1.5-1.2 2.7-2.6 2.7S7.5 19.6 7.5 18.1v-5.6c-.5.7-1.2 1.1-2 1.1-1.2 0-2-1-2-2.3C3.5 6 7.4 2.5 12 2.5z"/><ellipse cx="9.4" cy="6.6" rx="1.8" ry="1.1" fill="rgba(255,255,255,.35)"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="2.5" fill="currentColor"/><rect x="4" y="10" width="16" height="4" rx="2" fill="#FFF4E2" stroke="currentColor" stroke-width="1"/><rect x="3" y="15" width="18" height="5" rx="2.5" fill="currentColor"/></symbol>
+  <symbol id="i-scissors" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="6" cy="7" r="3"/><circle cx="6" cy="17" r="3"/><path d="M8.4 8.6L20 17M8.4 15.4L20 7"/></g></symbol>
   <symbol id="i-qc" viewBox="0 0 120 120">
     <path id="qcArc" d="M60 60 m-43 0 a43 43 0 1 1 86 0 a43 43 0 1 1 -86 0" fill="none"/>
     <circle cx="60" cy="60" r="56" fill="none" stroke="currentColor" stroke-width="3"/>
@@ -378,7 +484,7 @@ button { font: inherit; color: inherit; }
   </symbol>
 </svg>
 
-<main class="game" id="game" aria-label="Farm to First Bite, a 60-second Nutrielle game">
+<main class="game" id="game" data-brand="nutrielle" aria-label="Farm to First Bite, a 60-second IBP game">
   <header class="hud" id="hud" hidden>
     <div class="hud-top">
       <div class="stage-chip"><span class="stage-num" id="stageNum">1</span><span id="stageName">Harvest</span></div>
@@ -389,13 +495,13 @@ button { font: inherit; color: inherit; }
     </div>
     <div class="journey" aria-hidden="true">
       <div class="seg" style="--w:15"><span class="seg-name">Farm</span><span class="seg-track"><span class="seg-fill"></span></span></div>
-      <div class="seg" style="--w:30"><span class="seg-name">Kitchen</span><span class="seg-track"><span class="seg-fill"></span></span></div>
+      <div class="seg" style="--w:25"><span class="seg-name">Kitchen</span><span class="seg-track"><span class="seg-fill"></span></span></div>
       <div class="seg" style="--w:10"><span class="seg-name">Road</span><span class="seg-track"><span class="seg-fill"></span></span></div>
-      <div class="seg" style="--w:5"><span class="seg-name">You</span><span class="seg-track"><span class="seg-fill"></span></span></div>
+      <div class="seg" style="--w:10"><span class="seg-name">You</span><span class="seg-track"><span class="seg-fill"></span></span></div>
     </div>
     <div class="hud-pills">
-      <span class="pill" id="pillRagi"><svg class="ico c-ragi"><use href="#i-ragi"/></svg><b id="invRagi">0</b> ragi</span>
-      <span class="pill" id="pillMillet"><svg class="ico c-millet"><use href="#i-millet"/></svg><b id="invMillet">0</b> millet</span>
+      <span class="pill" id="pillHero"><svg class="ico" id="heroIco"><use href="#i-ragi"/></svg><b id="invHero">0</b> <span id="heroWord">ragi</span></span>
+      <span class="pill" id="pillBase"><svg class="ico" id="baseIco"><use href="#i-millet"/></svg><b id="invBase">0</b> <span id="baseWord">millet</span></span>
       <span class="pill" id="pillStars" hidden><svg class="ico c-gold"><use href="#i-star"/></svg><b id="starCount">0</b> orders</span>
       <span class="pill" id="pillPacks" hidden><svg class="ico c-olive"><use href="#i-pack"/></svg><b id="packCount">0</b> packs on board</span>
       <span class="pill" id="pillDrops" hidden><svg class="ico c-olive"><use href="#i-check"/></svg><b id="dropCount">0</b> delivered</span>
@@ -407,19 +513,19 @@ button { font: inherit; color: inherit; }
 
     <section class="bake" id="bake" hidden aria-label="Nutrielle Kitchen">
       <div class="bake-head">
-        <h2 class="bake-title">Nutrielle Kitchen</h2>
+        <h2 class="bake-title" id="bakeTitle">Nutrielle Kitchen</h2>
         <p class="bake-cap" id="bakeCap"></p>
       </div>
       <div class="orders" id="orders" aria-label="Orders"></div>
       <ol class="steps" aria-label="Stations">
-        <li><span class="n">1</span>Mill</li>
+        <li><span class="n">1</span><span id="step1">Mill</span></li>
         <li><span class="n">2</span>Mix</li>
         <li><span class="n">3</span>Bake</li>
         <li><span class="n">4</span>Pack</li>
       </ol>
       <div class="bench" id="bench">
         <div class="station" id="stMill">
-          <button class="mill-btn" id="millBtn" type="button" aria-label="Grind ragi with the millstone"><span class="millstone" id="millstone"></span></button>
+          <button class="mill-btn" id="millBtn" type="button" aria-label="Grind ragi with the millstone"><span class="millstone" id="millstone" data-tool="mill"></span></button>
           <div class="tap-dots" id="millDots" aria-hidden="true"><i></i><i></i><i></i></div>
           <p class="station-hint" id="millHint"></p>
         </div>
@@ -429,7 +535,7 @@ button { font: inherit; color: inherit; }
           <div class="chips" id="chips"></div>
         </div>
         <div class="station bake-ui" id="stBake" hidden>
-          <div class="oven" aria-hidden="true"><div class="oven-window"><span class="cookie oven-cookie" id="ovenCookie"></span></div></div>
+          <div class="oven" aria-hidden="true"><div class="oven-window"><span class="treat oven-treat" id="ovenCookie" data-look="grain"><i class="t-base"></i><i class="t-cream"></i><i class="t-top"></i><i class="t-melt"></i></span></div></div>
           <div class="bakebar" id="bakebar" aria-hidden="true"><span class="bake-marker"></span></div>
           <div class="bake-labels" aria-hidden="true"><span>Raw</span><span class="g">Golden</span><span>Burnt</span></div>
           <button class="btn btn-primary" id="bakeBtn" type="button">Put in oven</button>
@@ -437,10 +543,10 @@ button { font: inherit; color: inherit; }
         <div class="station" id="stPack" hidden>
           <button class="pack-btn" id="packBtn" type="button" aria-label="Pack and seal the cookies">
             <span class="pouch" id="pouch">
-              <svg class="ico"><use href="#i-leaf"/></svg>
-              <span class="pouch-name">Nutrielle</span>
+              <svg class="ico"><use id="pouchMark" href="#i-leaf"/></svg>
+              <span class="pouch-name" id="pouchName">Nutrielle</span>
               <span class="pouch-by">BY IBP</span>
-              <span class="pouch-var">Ragi &amp; Millet</span>
+              <span class="pouch-var" id="pouchVar">Ragi &amp; Millet</span>
               <span class="pouch-seal">SEALED<br>&amp; QC'D</span>
             </span>
           </button>
@@ -453,17 +559,37 @@ button { font: inherit; color: inherit; }
       </div>
     </section>
 
-    <section class="bite" id="bite" hidden aria-label="First bite">
-      <h2 class="bite-title">Your pack has arrived</h2>
-      <p class="bite-sub" id="biteSub">Open wide for the first bite</p>
-      <div class="bite-stage" id="biteStage">
+    <section class="bite" id="bite" hidden aria-label="Open the pack and take the first bite">
+      <h2 class="bite-title" id="biteTitle">Your pack has arrived</h2>
+      <p class="bite-sub" id="biteSub">Swipe along the arrow to tear it open</p>
+      <div class="tear" id="tear">
+        <div class="tear-pack" id="tearPack">
+          <div class="tp-body">
+            <span class="tp-mark" aria-hidden="true"><svg class="ico"><use id="tpMark" href="#i-leaf"/></svg></span>
+            <span class="tp-name" id="tpName">Nutrielle</span>
+            <span class="tp-by">BY IBP</span>
+            <span class="tp-var" id="tpVar">Ragi &amp; Millet</span>
+            <span class="tp-size" id="tpSize">50g · ₹45</span>
+          </div>
+          <div class="tp-top" aria-hidden="true"><span class="tear-label">TEAR HERE</span></div>
+          <span class="treat tp-treat" id="tpTreat" data-look="grain" aria-hidden="true"><i class="t-base"></i><i class="t-cream"></i><i class="t-top"></i><i class="t-melt"></i></span>
+          <div class="tear-line" id="tearLine" aria-hidden="true">
+            <span class="tear-cut"></span>
+            <span class="tear-hand"></span>
+            <svg class="tear-arrow" viewBox="0 0 24 24"><path d="M3 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="tear-sc"><svg class="ico"><use href="#i-scissors"/></svg></span>
+          </div>
+        </div>
+        <button class="link-btn tear-alt" id="tearBtn" type="button">Can't swipe? Tap to open</button>
+      </div>
+      <div class="bite-stage" id="biteStage" hidden>
         <div class="cam" id="cam" hidden>
           <video id="video" playsinline muted autoplay></video>
           <div class="face-guide" aria-hidden="true"></div>
-          <span class="cookie cam-cookie" id="camCookie" aria-hidden="true"></span>
+          <span class="treat cam-cookie" id="camCookie" data-look="grain" aria-hidden="true"><i class="t-base"></i><i class="t-cream"></i><i class="t-top"></i><i class="t-melt"></i></span>
         </div>
         <button class="tap-bite" id="tapBite" type="button" hidden aria-label="Tap to take a bite">
-          <span class="cookie big-cookie" id="bigCookie"></span>
+          <span class="treat big-cookie" id="bigCookie" data-look="grain"><i class="t-base"></i><i class="t-cream"></i><i class="t-top"></i><i class="t-melt"></i></span>
           <span class="tap-label">Tap to take a bite</span>
         </button>
         <div class="bite-wait" id="biteWait">Starting your camera…</div>
@@ -475,13 +601,13 @@ button { font: inherit; color: inherit; }
 
     <section class="end" id="end" hidden aria-label="Your scorecard">
       <div class="end-inner">
-        <div class="brand"><span class="brand-name"><svg class="ico"><use href="#i-leaf"/></svg>Nutrielle</span><span class="brand-by">by IBP</span></div>
-        <h2 class="end-title">Your cookie has an address</h2>
+        <div class="brand"><span class="brand-name"><svg class="ico"><use id="endMark" href="#i-leaf"/></svg><span id="endBrand">Nutrielle</span></span><span class="brand-by">by IBP</span></div>
+        <h2 class="end-title" id="endTitle">Your cookie has an address</h2>
         <div class="label-card">
           <div class="label-kicker">Traced from farm to first bite</div>
           <p class="label-line" id="endLine">Ragi &amp; Millet · ragi from Karnataka · by IBP</p>
-          <div class="label-route"><span>From: a partner farm, Karnataka</span><span>To: you</span></div>
-          <div class="stamp" aria-hidden="true"><b>RAGI</b><span lang="kn">ರಾಗಿ</span><small>KARNATAKA</small></div>
+          <div class="label-route"><span id="endFrom">From: a partner farm, Karnataka</span><span>To: you</span></div>
+          <div class="stamp" aria-hidden="true"><b id="stampWord">RAGI</b><span id="stampLocal" lang="kn">ರಾಗಿ</span><small id="stampOrigin">KARNATAKA</small></div>
         </div>
         <div class="rating-row">
           <div class="rating" id="rating" role="img" aria-label="Star rating"></div>
@@ -498,20 +624,24 @@ button { font: inherit; color: inherit; }
           <button class="btn btn-ghost" id="shareBtn" type="button">Share</button>
           <button class="btn btn-ghost" id="againBtn" type="button">Play again</button>
         </div>
+        <button class="link-btn end-pick" id="pickBtn" type="button">Try another biscuit</button>
       </div>
     </section>
 
     <section class="title" id="title" aria-label="Start">
       <div class="title-card">
-        <div class="brand"><span class="brand-name"><svg class="ico"><use href="#i-leaf"/></svg>Nutrielle</span><span class="brand-by">by IBP</span><span class="demo-badge" id="demoBadge" hidden>Demo plays itself</span></div>
+        <div class="brand"><span class="brand-name"><svg class="ico"><use id="titleMark" href="#i-leaf"/></svg><span id="titleBrand">Nutrielle</span></span><span class="brand-by">by IBP</span><span class="demo-badge" id="demoBadge" hidden>Demo plays itself</span></div>
         <h1 class="title-h">Farm to First Bite</h1>
-        <p class="title-p">Take our ragi from a partner farm in Karnataka to your first bite. Harvest, bake, deliver, taste. You have 60 seconds.</p>
-        <ol class="route" aria-label="Four stages">
-          <li><svg class="ico c-ragi"><use href="#i-ragi"/></svg><b>Harvest</b><span>15 s</span></li>
-          <li><svg class="ico c-olive"><use href="#i-oven"/></svg><b>Bake</b><span>30 s</span></li>
-          <li><svg class="ico c-olive"><use href="#i-truck"/></svg><b>Deliver</b><span>10 s</span></li>
-          <li><svg class="ico c-ragi"><use href="#i-cookie"/></svg><b>Bite</b><span>5 s</span></li>
-        </ol>
+        <p class="title-p" id="titleP">Take Nutrielle Ragi &amp; Millet from a partner farm in Karnataka to your first bite. Harvest, bake, deliver, open, taste.</p>
+        <fieldset class="pick">
+          <legend class="pick-label">Choose your biscuit</legend>
+          <div class="bcards" id="bcards"></div>
+        </fieldset>
+        <fieldset class="pick">
+          <legend class="pick-label">Pick a flavour</legend>
+          <div class="fchips" id="fchips"></div>
+        </fieldset>
+        <p class="route-line">Harvest 15s · Bake 25s · Deliver 10s · Open &amp; bite 10s</p>
         <label class="cam-opt" for="camToggle">
           <input class="switch" type="checkbox" id="camToggle" checked>
           <span>Use my camera for the first bite<small>Optional. Nothing is recorded or uploaded.</small></span>
@@ -567,24 +697,88 @@ button { font: inherit; color: inherit; }
    1. CONFIG
    ===================================================================== */
 const STAGES = [
-  { id: 'harvest', name: 'Harvest',    dur: 15, goal: 'Swipe the basket. Catch ragi and millet; let stones and husk fall.' },
-  { id: 'bake',    name: 'Bake',       dur: 30, goal: 'Mill, mix, bake, pack. Take each cookie out in the golden zone.' },
-  { id: 'deliver', name: 'Deliver',    dur: 10, goal: 'Swipe to change lanes. Drive over the stores and dodge the potholes.' },
-  { id: 'bite',    name: 'First Bite', dur: 5,  goal: 'Your pack has arrived. Open wide, or tap, for the first bite.' },
+  { id: 'harvest', name: 'Harvest',     dur: 15 },
+  { id: 'bake',    name: 'Bake',        dur: 25 },
+  { id: 'deliver', name: 'Deliver',     dur: 10 },
+  { id: 'bite',    name: 'Open & Bite', dur: 10 },
 ];
 const TOTAL_TIME = STAGES.reduce((sum, s) => sum + s.dur, 0);       // 60 seconds of play
-const RECIPE = { name: 'Ragi & Millet', ragi: 1, millet: 1 };         // grain needed per cookie
-const DISTRACTORS = [                                                  // other Nutrielle variants' ingredients
-  { id: 'oats', label: 'Oats' }, { id: 'almonds', label: 'Almonds' },
-  { id: 'choco', label: 'Choco chips' }, { id: 'seeds', label: 'Seeds' },
-];
+const AUTO_TEAR_AT = 5;                                                // seconds left when we open the pack for you
+
+/* What the farms grow. `one` is the word used in counts ("3 ragi"). */
+const ITEMS = {
+  ragi:    { one: 'ragi',    label: 'Ragi',    icon: 'i-ragi',    color: '#7A3E22', crop: '#7A3E22', mound: '#8E522D', dot: '#5E2D16' },
+  millet:  { one: 'millet',  label: 'Millet',  icon: 'i-millet',  color: '#C9962E', crop: '#C99A3B', mound: '#D9A441', dot: '#E0B04F' },
+  wheat:   { one: 'wheat',   label: 'Wheat',   icon: 'i-wheat',   color: '#B8862A', crop: '#D6A243', mound: '#C9962E', dot: '#F0CF7A' },
+  oats:    { one: 'oats',    label: 'Oats',    icon: 'i-oats',    color: '#A88E55', crop: '#E0D2A8', mound: '#D9C89A', dot: '#F4EBD0' },
+  cocoa:   { one: 'cocoa',   label: 'Cocoa',   icon: 'i-cocoa',   color: '#A24A1F', crop: '#B9622B', mound: '#6B3A1E', dot: '#3E1E10' },
+  coconut: { one: 'coconut', label: 'Coconut', icon: 'i-coconut', color: '#6B4A2E', crop: '#7A5232', mound: '#F3EBDD', dot: '#FFFFFF' },
+  vanilla: { one: 'vanilla', label: 'Vanilla', icon: 'i-vanilla', color: '#3E2616', crop: '#4A3020', mound: '#3E2616', dot: '#EDE6A6' },
+  milk:    { one: 'milk',    label: 'Milk',    icon: 'i-milk',    color: '#7E8B96', crop: '#E8EEF3', mound: '#F6F8FA', dot: '#C9D8E8' },
+};
+/* Wrong answers the Mix station can offer, besides other farms' ingredients. */
+const EXTRAS = { almonds: 'Almonds', choco: 'Choco chips', seeds: 'Seeds', jam: 'Jam' };
+
+/* The three biscuits, two flavours each. Every flavour names the farm its hero ingredient comes from:
+   the hero is ground, melted, grated or whipped at station 1; the base is added at station 2. */
+const BRANDS = {
+  nutrielle: {
+    name: 'Nutrielle', noun: 'cookie', blurb: 'Grain cookies', mark: 'i-leaf', price: 45, code: 'TASTE-TRACE-45', size: '50g trial pack',
+    qcArc: 'IBP QUALITY CONTROL · NUTRIELLE KITCHEN ·',
+    pack: { pk: '#4E6B2E', deep: '#2A3D1C', label: '#FFFAEE', ink: '#2A3D1C', accent: '#C99A3B' },
+    confetti: ['#C99A3B', '#4E6B2E', '#F0D38A', '#8DA567'],
+    flavours: [
+      { id: 'ragi-millet', name: 'Ragi & Millet', hero: 'ragi', base: 'millet', origin: 'Karnataka', local: 'ರಾಗಿ', lang: 'kn', tool: 'mill', look: 'grain',
+        wrong: ['oats', 'almonds', 'choco', 'jam'], colors: { raw: '#D8BE97', gold: '#8F5530', burnt: '#2E1B0E', dough: '#8D5D3E', doughHi: '#B58763' } },
+      { id: 'wheat-oats', name: 'Whole Wheat & Oats', hero: 'wheat', base: 'oats', origin: 'Madhya Pradesh', local: 'गेहूँ', lang: 'hi', tool: 'mill', look: 'oat',
+        wrong: ['ragi', 'millet', 'choco', 'jam'], colors: { raw: '#E4CDA2', gold: '#B07A40', burnt: '#3A2412', dough: '#B98A55', doughHi: '#D9B482' } },
+    ],
+  },
+  molten: {
+    name: 'Molten Crave', noun: 'cookie', blurb: 'Molten centre', mark: 'i-drip', price: 60, code: 'TASTE-TRACE-60', size: '50g pack',
+    qcArc: 'IBP QUALITY CONTROL · MOLTEN CRAVE ·',
+    pack: { pk: '#3B2214', deep: '#24140B', label: '#F6E6CC', ink: '#3B2214', accent: '#C9A24B' },
+    confetti: ['#C9A24B', '#6E3B1E', '#EED593', '#B4875A'],
+    flavours: [
+      { id: 'choco-chip', name: 'Choco Chip', hero: 'cocoa', base: 'wheat', origin: 'Kerala', local: 'കൊക്കോ', lang: 'ml', tool: 'melt', look: 'chip',
+        wrong: ['oats', 'ragi', 'coconut', 'jam'], colors: { raw: '#E6CFA6', gold: '#BE8445', burnt: '#3A2210', dough: '#C49A62', doughHi: '#E2C08C' } },
+      { id: 'coconut', name: 'Coconut', hero: 'coconut', base: 'cocoa', origin: 'Tamil Nadu', local: 'தேங்காய்', lang: 'ta', tool: 'grate', look: 'coconut',
+        wrong: ['ragi', 'oats', 'millet', 'jam'], colors: { raw: '#EEDDBB', gold: '#C99556', burnt: '#3E2614', dough: '#D9BC8C', doughHi: '#F0DDB8' } },
+    ],
+  },
+  cremeo: {
+    name: 'Crème-O', noun: 'biscuit', blurb: 'Cream layers', mark: 'i-layers', price: 10, code: 'TASTE-TRACE-10', size: '50g pack',
+    qcArc: 'IBP QUALITY CONTROL · CRÈME-O KITCHEN ·',
+    pack: { pk: '#22336B', deep: '#141F45', label: '#FFF6E6', ink: '#16224A', accent: '#D3A23F' },
+    confetti: ['#D3A23F', '#2C3F7C', '#F2D58C', '#8394C4'],
+    flavours: [
+      { id: 'vanilla', name: 'Classic Vanilla', hero: 'vanilla', base: 'milk', origin: 'Kerala', local: 'വാനില', lang: 'ml', tool: 'whip', look: 'sw',
+        wrong: ['cocoa', 'ragi', 'coconut', 'jam'], colors: { raw: '#F1E0BA', gold: '#D8A75C', burnt: '#4A2E14', cream: '#FFF4E0', dough: '#E8CC94', doughHi: '#F6E4BE' } },
+      { id: 'chocolate', name: 'Chocolate', hero: 'cocoa', base: 'milk', origin: 'Karnataka', local: 'ಕೋಕೋ', lang: 'kn', tool: 'whip', look: 'sw',
+        wrong: ['ragi', 'coconut', 'oats', 'jam'], colors: { raw: '#9A6A48', gold: '#5A3220', burnt: '#1E110A', cream: '#A06A44', dough: '#6E4630', doughHi: '#9A6A48' } },
+    ],
+  },
+};
+/* Station 1 changes with the flavour: a millstone, a melting pot, a coconut scraper or a whisking bowl. */
+const TOOLS = {
+  mill:  { verb: 'Mill',  aria: 'Grind the {hero} with the millstone', hint: 'Tap the millstone 3 times to grind {n} {hero} into flour', bits: ['#EDE2CC', '#F6EEDB', '#D8C7A4'] },
+  melt:  { verb: 'Melt',  aria: 'Melt the {hero} in the pot',         hint: 'Tap the pot 3 times to melt {n} {hero} into chocolate',   bits: ['#6B3A1E', '#4A2412', '#8C5426'] },
+  grate: { verb: 'Grate', aria: 'Grate the {hero}',                    hint: 'Tap the coconut 3 times to grate {n} {hero}',             bits: ['#FFFDF6', '#F1E8D6', '#FFFFFF'] },
+  whip:  { verb: 'Whip',  aria: 'Whip the {hero} into cream',          hint: 'Tap the bowl 3 times to whip {n} {hero} into cream',      bits: ['#FFFFFF', '#FFF6E6', '#E6ECF5'] },
+};
+const SCRIPT_FONT = {
+  kn: '"Noto Sans Kannada", "Kannada Sangam MN", "Nirmala UI", Tunga, sans-serif',
+  ml: '"Noto Sans Malayalam", "Malayalam Sangam MN", "Nirmala UI", Kartika, sans-serif',
+  ta: '"Noto Sans Tamil", "Tamil Sangam MN", "Nirmala UI", Latha, sans-serif',
+  hi: 'Hind, "Noto Sans Devanagari", "Kohinoor Devanagari", "Nirmala UI", Mangal, sans-serif',
+};
+const TREAT = '<i class="t-base"></i><i class="t-cream"></i><i class="t-top"></i><i class="t-melt"></i>';
 const STORES = {
   kirana: { label: 'KIRANA',         name: 'a kirana',               fill: '#4E6B2E', ink: '#FFFAEE' },
   super:  { label: 'SUPERMARKET',    name: 'a supermarket',          fill: '#C99A3B', ink: '#2A3D1C' },
   qcom:   { label: 'QUICK-COMMERCE', name: 'a quick-commerce store', fill: '#2A3D1C', ink: '#F0D38A' },
 };
 const RATING_STEPS = [400, 800, 1200, 1600];                           // score for 2, 3, 4, 5 stars
-const OFFER_CODE = 'TASTE-TRACE-45';
 const DEMO = location.hash === '#demo';                                // #demo: the game plays itself
 const REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 const STORE_KEY = 'ibp-farm-to-first-bite';
@@ -594,6 +788,9 @@ const STORE_KEY = 'ibp-farm-to-first-bite';
    ===================================================================== */
 const GameState = {
   phase: 'title',          // title | intro | harvest | bake | deliver | bite | end
+  brand: 'nutrielle',      // the biscuit picked on the start screen
+  flavour: 'ragi-millet',
+  lastFlavour: {},         // remembered flavour per brand
   stageIndex: -1,
   stageTimeLeft: 0,
   running: false,          // true while the active stage's clock is ticking
@@ -604,12 +801,13 @@ const GameState = {
   muted: false,
   cameraWanted: true,
   cameraStatus: 'unknown', // unknown | granted | denied | off
-  inventory: { ragi: 0, millet: 0 },                   // Stage 1 → Stage 2
-  harvest: { ragi: 0, millet: 0, golden: 0, stones: 0, husk: 0 },
+  inventory: { hero: 0, base: 0 },                     // Stage 1 → Stage 2 (hero = the farm's star ingredient)
+  harvest: { hero: 0, base: 0, golden: 0, stones: 0, husk: 0 },
   bake: { orders: 0, cookies: 0, rejects: 0 },         // one star per finished order
   packs: 0,                                            // Stage 2 → Stage 3
   delivered: { kirana: 0, super: 0, qcom: 0 },
   potholes: 0,
+  tearMethod: '',
   biteMethod: '',
 };
 
@@ -619,14 +817,23 @@ function resetRun() {
   GameState.stageTimeLeft = 0;
   GameState.running = false;
   GameState.score = 0;
-  GameState.inventory = { ragi: 0, millet: 0 };
-  GameState.harvest = { ragi: 0, millet: 0, golden: 0, stones: 0, husk: 0 };
+  GameState.inventory = { hero: 0, base: 0 };
+  GameState.harvest = { hero: 0, base: 0, golden: 0, stones: 0, husk: 0 };
   GameState.bake = { orders: 0, cookies: 0, rejects: 0 };
   GameState.packs = 0;
   GameState.delivered = { kirana: 0, super: 0, qcom: 0 };
   GameState.potholes = 0;
+  GameState.tearMethod = '';
   GameState.biteMethod = '';
 }
+
+/* The picked biscuit and flavour, with its two ingredients and station-1 tool. */
+function cur() {
+  const b = BRANDS[GameState.brand] || BRANDS.nutrielle;
+  const f = b.flavours.find((x) => x.id === GameState.flavour) || b.flavours[0];
+  return { b, f, hero: ITEMS[f.hero], base: ITEMS[f.base], tool: TOOLS[f.tool] };
+}
+const fillIn = (tpl, map) => tpl.replace(/\{(\w+)\}/g, (_, k) => map[k]);
 
 /* Seconds left in the whole game (current stage + every later stage). */
 function totalTimeLeft() {
@@ -646,22 +853,27 @@ const el = {
   totalTime: $('totalTime'), score: $('score'), muteBtn: $('muteBtn'),
   segs: Array.from(document.querySelectorAll('.journey .seg')),
   segFills: Array.from(document.querySelectorAll('.journey .seg-fill')),
-  pills: { ragi: $('pillRagi'), millet: $('pillMillet'), stars: $('pillStars'), packs: $('pillPacks'), drops: $('pillDrops') },
-  invRagi: $('invRagi'), invMillet: $('invMillet'), starCount: $('starCount'), packCount: $('packCount'), dropCount: $('dropCount'),
-  title: $('title'), demoBadge: $('demoBadge'), camToggle: $('camToggle'), startBtn: $('startBtn'), startNote: $('startNote'), skipCamBtn: $('skipCamBtn'),
+  pills: { hero: $('pillHero'), base: $('pillBase'), stars: $('pillStars'), packs: $('pillPacks'), drops: $('pillDrops') },
+  heroIco: $('heroIco'), baseIco: $('baseIco'), heroWord: $('heroWord'), baseWord: $('baseWord'),
+  invHero: $('invHero'), invBase: $('invBase'), starCount: $('starCount'), packCount: $('packCount'), dropCount: $('dropCount'),
+  title: $('title'), titleMark: $('titleMark'), titleBrand: $('titleBrand'), titleP: $('titleP'), bcards: $('bcards'), fchips: $('fchips'),
+  demoBadge: $('demoBadge'), camToggle: $('camToggle'), startBtn: $('startBtn'), startNote: $('startNote'), skipCamBtn: $('skipCamBtn'),
   intro: $('intro'), introKicker: $('introKicker'), introTitle: $('introTitle'), introTime: $('introTime'), introGoal: $('introGoal'), introCarry: $('introCarry'), introGo: $('introGo'),
-  bake: $('bake'), bakeCap: $('bakeCap'), orders: $('orders'), steps: Array.from(document.querySelectorAll('.steps li')), bench: $('bench'),
+  bake: $('bake'), bakeTitle: $('bakeTitle'), bakeCap: $('bakeCap'), orders: $('orders'), steps: Array.from(document.querySelectorAll('.steps li')), step1: $('step1'), bench: $('bench'),
   stMill: $('stMill'), millBtn: $('millBtn'), millstone: $('millstone'), millDots: Array.from(document.querySelectorAll('#millDots i')), millHint: $('millHint'),
   stMix: $('stMix'), bowl: $('bowl'), mixHint: $('mixHint'), chips: $('chips'),
   stBake: $('stBake'), ovenCookie: $('ovenCookie'), bakebar: $('bakebar'), bakeBtn: $('bakeBtn'),
-  stPack: $('stPack'), packBtn: $('packBtn'), pouch: $('pouch'), packHint: $('packHint'),
+  stPack: $('stPack'), packBtn: $('packBtn'), pouch: $('pouch'), pouchMark: $('pouchMark'), pouchName: $('pouchName'), pouchVar: $('pouchVar'), packHint: $('packHint'),
   stEmpty: $('stEmpty'), emptyMsg: $('emptyMsg'), emptyBonus: $('emptyBonus'),
-  qc: $('qc'), qcReason: $('qcReason'),
-  bite: $('bite'), biteSub: $('biteSub'), biteStage: $('biteStage'), cam: $('cam'), video: $('video'), camCookie: $('camCookie'),
+  qc: $('qc'), qcTitle: $('qcTitle'), qcReason: $('qcReason'),
+  bite: $('bite'), biteTitle: $('biteTitle'), biteSub: $('biteSub'), biteStage: $('biteStage'), cam: $('cam'), video: $('video'), camCookie: $('camCookie'),
   tapBite: $('tapBite'), bigCookie: $('bigCookie'), biteWait: $('biteWait'), crunchWord: $('crunchWord'), biteNote: $('biteNote'),
-  end: $('end'), rating: $('rating'), endScore: $('endScore'), endBest: $('endBest'),
+  tear: $('tear'), tearPack: $('tearPack'), tearLine: $('tearLine'), tearBtn: $('tearBtn'), tpMark: $('tpMark'), tpName: $('tpName'), tpVar: $('tpVar'), tpSize: $('tpSize'), tpTreat: $('tpTreat'),
+  end: $('end'), endMark: $('endMark'), endBrand: $('endBrand'), endTitle: $('endTitle'), endLine: $('endLine'), endFrom: $('endFrom'),
+  stampWord: $('stampWord'), stampLocal: $('stampLocal'), stampOrigin: $('stampOrigin'),
+  rating: $('rating'), endScore: $('endScore'), endBest: $('endBest'),
   statFarm: $('statFarm'), statKitchen: $('statKitchen'), statRoad: $('statRoad'), statYou: $('statYou'),
-  offerBtn: $('offerBtn'), shareBtn: $('shareBtn'), againBtn: $('againBtn'),
+  offerBtn: $('offerBtn'), shareBtn: $('shareBtn'), againBtn: $('againBtn'), pickBtn: $('pickBtn'),
   sheet: $('sheet'), sheetTitle: $('sheetTitle'), sheetBody: $('sheetBody'), sheetClose: $('sheetClose'),
   toast: $('toast'), announcer: $('announcer'),
 };
@@ -741,10 +953,10 @@ function centerOf(node) {
 /* Colour helpers for the baking cookie. */
 function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 function mixColor(a, b, t) { const A = hexToRgb(a), B = hexToRgb(b); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], t))).join(',')})`; }
-function cookieColor(p, z0, z1) {
-  if (p < z0) return mixColor('#D8BE97', '#8F5530', p / z0);
-  if (p <= z1) return '#8F5530';
-  return mixColor('#8F5530', '#2E1B0E', clamp((p - z1) / (1 - z1), 0, 1));
+function cookieColor(p, z0, z1, c) {
+  if (p < z0) return mixColor(c.raw, c.gold, p / z0);
+  if (p <= z1) return c.gold;
+  return mixColor(c.gold, c.burnt, clamp((p - z1) / (1 - z1), 0, 1));
 }
 
 /* =====================================================================
@@ -758,10 +970,16 @@ function loadPrefs() {
     GameState.best = Number(d.best) || 0;
     GameState.muted = !!d.muted;
     if (typeof d.cameraWanted === 'boolean') GameState.cameraWanted = d.cameraWanted;
+    if (d.last && typeof d.last === 'object') GameState.lastFlavour = d.last;
+    if (BRANDS[d.brand]) {
+      GameState.brand = d.brand;
+      const f = BRANDS[d.brand].flavours.find((x) => x.id === d.flavour) || BRANDS[d.brand].flavours[0];
+      GameState.flavour = f.id;
+    }
   } catch (e) { /* storage blocked: defaults are fine */ }
 }
 function savePrefs() {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify({ best: GameState.best, muted: GameState.muted, cameraWanted: GameState.cameraWanted })); } catch (e) { /* ignore */ }
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({ best: GameState.best, muted: GameState.muted, cameraWanted: GameState.cameraWanted, brand: GameState.brand, flavour: GameState.flavour, last: GameState.lastFlavour })); } catch (e) { /* ignore */ }
 }
 function applyPrefsToUI() {
   el.camToggle.checked = GameState.cameraWanted;
@@ -835,6 +1053,8 @@ const Sound = {
   ding() { this.tone(1568, 0.32, 'sine', 0.13); this.tone(2093, 0.4, 'sine', 0.07, 0.05); },
   swish() { this.noise(0, 0.13, 'bandpass', 900, 0.7, 0.09, 2400); },
   whoosh() { this.noise(0, 0.38, 'bandpass', 380, 0.8, 0.12, 2600); },
+  rip() { this.noise(0, 0.045, 'highpass', 2400, 0.8, 0.11, 5200); },
+  tear() { for (let i = 0; i < 6; i++) this.noise(i * 0.03, 0.045, 'highpass', 1600 + i * 500, 0.9, 0.17 - i * 0.015, 6500); this.tone(660, 0.14, 'triangle', 0.08, 0.2, 990); },
   /* The hero sound: a snap, a burst of crackles, then a smaller chew. */
   crunch() {
     if (!this.ok()) return;
@@ -921,7 +1141,8 @@ function drawRagiHead(g, s, gold, t) {
   if (gold) drawSparkle(g, s * 0.34, -s * 0.44, s * 0.17 * (0.6 + 0.4 * Math.sin(t * 9)), '#FFF6D8');
 }
 /* Millet: a golden spike dotted with grain. */
-function drawMillet(g, s) {
+function drawMillet(g, s, gold) {
+  if (gold) { g.shadowColor = 'rgba(240, 200, 90, .95)'; g.shadowBlur = s * 0.5; }
   g.strokeStyle = '#6F8040'; g.lineWidth = Math.max(1.5, s * 0.06); g.lineCap = 'round';
   g.beginPath(); g.moveTo(0, s * 0.55); g.lineTo(0, s * 0.26); g.stroke();
   g.fillStyle = '#7E9A50'; g.beginPath();
@@ -935,6 +1156,7 @@ function drawMillet(g, s) {
     const yy = -h * 0.5 + row * h * 0.13, xx = (col - 1) * w * 0.27 + (row % 2 ? w * 0.13 : 0);
     if (Math.abs(xx) < w * 0.4) { g.beginPath(); g.arc(xx, yy, s * 0.028, 0, Math.PI * 2); g.fill(); }
   }
+  g.shadowBlur = 0;
 }
 function drawStone(g, s, poly) {
   const r = s * 0.45;
@@ -948,10 +1170,135 @@ function drawHusk(g, s) {
   g.beginPath(); g.moveTo(-s * 0.42, s * 0.1); g.quadraticCurveTo(0, -s * 0.46, s * 0.42, s * 0.05); g.quadraticCurveTo(0, -s * 0.12, -s * 0.42, s * 0.1); g.closePath(); g.fill(); g.stroke();
   g.beginPath(); g.moveTo(-s * 0.28, s * 0.04); g.quadraticCurveTo(0, -s * 0.24, s * 0.28, 0); g.stroke();
 }
+/* Wheat ear: paired grains climbing a stem, with fine awns. */
+function drawWheat(g, s, gold, t) {
+  const grain = gold ? '#F2C94C' : '#D6A243', dark = gold ? '#B98A2E' : '#A87A2A', awn = gold ? 'rgba(242, 201, 76, .9)' : 'rgba(150, 110, 40, .7)';
+  if (gold) { g.shadowColor = 'rgba(240, 200, 90, .95)'; g.shadowBlur = s * 0.55; }
+  g.strokeStyle = gold ? '#B98A2E' : '#8A7A3A'; g.lineWidth = Math.max(1.4, s * 0.06); g.lineCap = 'round';
+  g.beginPath(); g.moveTo(0, s * 0.55); g.quadraticCurveTo(s * 0.04, s * 0.2, 0, -s * 0.3); g.stroke();
+  for (let k = 0; k < 5; k++) {
+    const y = s * 0.18 - k * s * 0.13, r = s * (0.075 - k * 0.006);
+    for (const side of [-1, 1]) {
+      g.save(); g.translate(side * s * 0.075, y); g.rotate(side * 0.45);
+      g.strokeStyle = awn; g.lineWidth = 0.9; g.beginPath(); g.moveTo(0, -r); g.lineTo(side * s * 0.05, -r - s * 0.2); g.stroke();
+      g.fillStyle = grain; g.beginPath(); g.ellipse(0, 0, r * 0.75, r * 1.35, 0, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = dark; g.lineWidth = 0.7; g.stroke();
+      g.restore();
+    }
+  }
+  g.fillStyle = grain; g.beginPath(); g.ellipse(0, -s * 0.47, s * 0.05, s * 0.09, 0, 0, Math.PI * 2); g.fill();
+  g.shadowBlur = 0;
+  if (gold) drawSparkle(g, s * 0.32, -s * 0.42, s * 0.17 * (0.6 + 0.4 * Math.sin(t * 9)), '#FFF6D8');
+}
+/* Oats: a drooping spray of pale spikelets. */
+function drawOats(g, s, gold) {
+  const husk = gold ? '#F5D77A' : '#EADDB6', edge = gold ? '#B98A2E' : '#B49C63', stem = gold ? '#B98A2E' : '#8C7A4E';
+  if (gold) { g.shadowColor = 'rgba(240, 200, 90, .95)'; g.shadowBlur = s * 0.5; }
+  g.lineCap = 'round'; g.strokeStyle = stem; g.lineWidth = Math.max(1.3, s * 0.05);
+  g.beginPath(); g.moveTo(0, s * 0.55); g.quadraticCurveTo(-s * 0.03, 0, 0, -s * 0.42); g.stroke();
+  for (const [yy, dir] of [[-0.4, -1], [-0.26, 1], [-0.1, -1], [0.06, 1], [0.2, -1]]) {
+    const sy = s * yy, ex = dir * s * 0.24, ey = sy + s * 0.07;
+    g.strokeStyle = stem; g.lineWidth = Math.max(0.9, s * 0.028);
+    g.beginPath(); g.moveTo(0, sy); g.quadraticCurveTo(ex * 0.6, sy - s * 0.06, ex, ey - s * 0.04); g.stroke();
+    g.save(); g.translate(ex, ey + s * 0.04); g.rotate(-dir * 0.25);
+    g.fillStyle = husk; g.beginPath();
+    g.moveTo(0, -s * 0.09); g.quadraticCurveTo(s * 0.07, s * 0.02, 0, s * 0.11); g.quadraticCurveTo(-s * 0.07, s * 0.02, 0, -s * 0.09); g.closePath(); g.fill();
+    g.strokeStyle = edge; g.lineWidth = 0.8; g.stroke();
+    g.restore();
+  }
+  g.fillStyle = husk; g.beginPath(); g.ellipse(0, -s * 0.48, s * 0.05, s * 0.085, 0, 0, Math.PI * 2); g.fill(); g.strokeStyle = edge; g.stroke();
+  g.shadowBlur = 0;
+}
+/* Cocoa pod: ridged and ripe, on a short stalk. */
+function drawCocoa(g, s, gold, t) {
+  if (gold) { g.shadowColor = 'rgba(240, 200, 90, .95)'; g.shadowBlur = s * 0.55; }
+  g.strokeStyle = gold ? '#B98A2E' : '#5E3B1E'; g.lineWidth = Math.max(1.6, s * 0.06); g.lineCap = 'round';
+  g.beginPath(); g.moveTo(0, -s * 0.36); g.lineTo(s * 0.03, -s * 0.52); g.stroke();
+  const w = s * 0.25, h = s * 0.44;
+  const gr = g.createLinearGradient(-w, 0, w, 0);
+  if (gold) { gr.addColorStop(0, '#C99A3B'); gr.addColorStop(0.45, '#F6D77E'); gr.addColorStop(1, '#B9862C'); }
+  else { gr.addColorStop(0, '#8E3B1A'); gr.addColorStop(0.45, '#C8692C'); gr.addColorStop(1, '#7A3016'); }
+  g.fillStyle = gr; g.beginPath();
+  g.moveTo(0, -h * 0.86);
+  g.bezierCurveTo(w * 1.15, -h * 0.7, w * 1.1, h * 0.55, 0, h);
+  g.bezierCurveTo(-w * 1.1, h * 0.55, -w * 1.15, -h * 0.7, 0, -h * 0.86);
+  g.closePath(); g.fill();
+  g.strokeStyle = gold ? 'rgba(150, 105, 25, .55)' : 'rgba(60, 20, 8, .45)'; g.lineWidth = 1; g.stroke();
+  g.shadowBlur = 0;
+  g.strokeStyle = gold ? 'rgba(150, 105, 25, .45)' : 'rgba(70, 25, 10, .4)'; g.lineWidth = Math.max(0.8, s * 0.022);
+  for (const k of [-0.5, 0, 0.5]) { g.beginPath(); g.moveTo(w * k * 0.5, -h * 0.75); g.quadraticCurveTo(w * k * 1.25, 0, w * k * 0.35, h * 0.9); g.stroke(); }
+  g.fillStyle = 'rgba(255, 230, 190, .28)'; g.beginPath(); g.ellipse(-w * 0.38, -h * 0.25, w * 0.16, h * 0.3, 0.2, 0, Math.PI * 2); g.fill();
+  if (gold) drawSparkle(g, s * 0.3, -s * 0.4, s * 0.17 * (0.6 + 0.4 * Math.sin(t * 9)), '#FFF6D8');
+}
+/* Coconut: a brown, hairy nut with its three eyes. */
+function drawCoconut(g, s, gold, t) {
+  const r = s * 0.36;
+  if (gold) { g.shadowColor = 'rgba(240, 200, 90, .95)'; g.shadowBlur = s * 0.55; }
+  const gr = g.createRadialGradient(-r * 0.35, -r * 0.4, r * 0.2, 0, 0, r * 1.1);
+  if (gold) { gr.addColorStop(0, '#F6D77E'); gr.addColorStop(1, '#B9862C'); } else { gr.addColorStop(0, '#9A6A40'); gr.addColorStop(1, '#5A381D'); }
+  g.fillStyle = gr; g.beginPath(); g.arc(0, 0, r, 0, Math.PI * 2); g.fill();
+  g.shadowBlur = 0;
+  g.strokeStyle = gold ? 'rgba(255, 246, 216, .45)' : 'rgba(214, 170, 120, .4)'; g.lineWidth = 0.9;
+  for (let i = 0; i < 9; i++) {
+    const a = -2.6 + i * 0.6;
+    g.beginPath(); g.moveTo(Math.cos(a) * r * 0.35, Math.sin(a) * r * 0.35);
+    g.quadraticCurveTo(Math.cos(a + 0.3) * r * 0.75, Math.sin(a + 0.3) * r * 0.75, Math.cos(a + 0.15) * r * 0.95, Math.sin(a + 0.15) * r * 0.95); g.stroke();
+  }
+  g.fillStyle = gold ? '#8C6716' : '#2A1A0E';
+  for (const [x, y] of [[-0.22, -0.5], [0.2, -0.5], [0, -0.22]]) { g.beginPath(); g.ellipse(x * r, y * r, r * 0.11, r * 0.13, 0, 0, Math.PI * 2); g.fill(); }
+  if (gold) drawSparkle(g, s * 0.3, -s * 0.38, s * 0.17 * (0.6 + 0.4 * Math.sin(t * 9)), '#FFF6D8');
+}
+/* Vanilla: cured pods tied under an orchid flower. */
+function drawVanilla(g, s, gold, t) {
+  if (gold) { g.shadowColor = 'rgba(240, 200, 90, .95)'; g.shadowBlur = s * 0.55; }
+  const pod = gold ? '#C99A3B' : '#3E2616', hi = gold ? '#F6D77E' : '#7A5434';
+  g.lineCap = 'round';
+  for (const [dx, bend, wdt] of [[-0.09, -0.12, 0.09], [0.07, 0.1, 0.085]]) {
+    g.strokeStyle = pod; g.lineWidth = s * wdt;
+    g.beginPath(); g.moveTo(s * dx, -s * 0.32); g.quadraticCurveTo(s * (dx + bend), s * 0.08, s * dx * 0.6, s * 0.5); g.stroke();
+    g.strokeStyle = hi; g.lineWidth = Math.max(0.8, s * 0.018);
+    g.beginPath(); g.moveTo(s * dx - s * 0.015, -s * 0.26); g.quadraticCurveTo(s * (dx + bend) - s * 0.02, s * 0.06, s * dx * 0.6 - s * 0.015, s * 0.42); g.stroke();
+  }
+  g.shadowBlur = 0;
+  g.strokeStyle = gold ? '#B98A2E' : '#8C7A3A'; g.lineWidth = Math.max(1.2, s * 0.035);
+  g.beginPath(); g.moveTo(-s * 0.15, -s * 0.2); g.quadraticCurveTo(0, -s * 0.13, s * 0.15, -s * 0.2); g.stroke();
+  g.fillStyle = gold ? '#FFF1BF' : '#EDE6A6';
+  for (let i = 0; i < 5; i++) { g.save(); g.translate(0, -s * 0.38); g.rotate(i * (Math.PI * 2 / 5)); g.beginPath(); g.ellipse(0, -s * 0.075, s * 0.042, s * 0.08, 0, 0, Math.PI * 2); g.fill(); g.restore(); }
+  g.fillStyle = gold ? '#E2B243' : '#C9B54A'; g.beginPath(); g.arc(0, -s * 0.38, s * 0.042, 0, Math.PI * 2); g.fill();
+  if (gold) drawSparkle(g, s * 0.3, -s * 0.46, s * 0.17 * (0.6 + 0.4 * Math.sin(t * 9)), '#FFF6D8');
+}
+/* Milk can, the steel kind every dairy farm uses. */
+function drawMilk(g, s, gold, t) {
+  if (gold) { g.shadowColor = 'rgba(240, 200, 90, .95)'; g.shadowBlur = s * 0.55; }
+  const w = s * 0.46, h = s * 0.66, y0 = -h * 0.4;
+  const gr = g.createLinearGradient(-w / 2, 0, w / 2, 0);
+  if (gold) { gr.addColorStop(0, '#C99A3B'); gr.addColorStop(0.4, '#F6D77E'); gr.addColorStop(1, '#B9862C'); }
+  else { gr.addColorStop(0, '#9AA6B0'); gr.addColorStop(0.4, '#EEF2F5'); gr.addColorStop(1, '#8C98A3'); }
+  g.fillStyle = gr; g.beginPath();
+  g.moveTo(-w * 0.26, y0); g.lineTo(w * 0.26, y0);
+  g.quadraticCurveTo(w * 0.5, y0 + h * 0.12, w * 0.5, y0 + h * 0.3);
+  g.lineTo(w * 0.5, y0 + h * 0.92); g.quadraticCurveTo(w * 0.5, y0 + h, w * 0.4, y0 + h);
+  g.lineTo(-w * 0.4, y0 + h); g.quadraticCurveTo(-w * 0.5, y0 + h, -w * 0.5, y0 + h * 0.92);
+  g.lineTo(-w * 0.5, y0 + h * 0.3); g.quadraticCurveTo(-w * 0.5, y0 + h * 0.12, -w * 0.26, y0);
+  g.closePath(); g.fill();
+  g.strokeStyle = 'rgba(60, 70, 80, .35)'; g.lineWidth = 1; g.stroke();
+  g.shadowBlur = 0;
+  g.fillStyle = gold ? '#8C6716' : '#3E6FB0'; g.fillRect(-w * 0.5, y0 + h * 0.52, w, h * 0.13);
+  g.fillStyle = gold ? '#B98A2E' : '#7E8B96'; roundRectPath(g, -w * 0.3, y0 - h * 0.12, w * 0.6, h * 0.14, 3); g.fill();
+  g.strokeStyle = gold ? '#B98A2E' : '#7E8B96'; g.lineWidth = Math.max(1.3, s * 0.04);
+  g.beginPath(); g.arc(-w * 0.5, y0 + h * 0.32, w * 0.16, Math.PI * 0.5, Math.PI * 1.5); g.stroke();
+  g.beginPath(); g.arc(w * 0.5, y0 + h * 0.32, w * 0.16, -Math.PI * 0.5, Math.PI * 0.5); g.stroke();
+  g.fillStyle = 'rgba(255, 255, 255, .55)'; g.fillRect(-w * 0.3, y0 + h * 0.2, w * 0.08, h * 0.6);
+  if (gold) drawSparkle(g, s * 0.3, -s * 0.42, s * 0.17 * (0.6 + 0.4 * Math.sin(t * 9)), '#FFF6D8');
+}
+const DRAW = { ragi: drawRagiHead, millet: drawMillet, wheat: drawWheat, oats: drawOats, cocoa: drawCocoa, coconut: drawCoconut, vanilla: drawVanilla, milk: drawMilk };
+function drawIngredient(g, id, s, gold, t) { (DRAW[id] || drawMillet)(g, s, gold, t); }
+/* hero / base / golden map to the picked flavour's two ingredients. */
 function drawItem(g, it) {
   g.save(); g.translate(it.x, it.y); g.rotate(it.rot);
-  if (it.type === 'ragi' || it.type === 'golden') drawRagiHead(g, it.s, it.type === 'golden', it.t || 0);
-  else if (it.type === 'millet') drawMillet(g, it.s);
+  const f = cur().f;
+  if (it.type === 'hero' || it.type === 'golden') drawIngredient(g, f.hero, it.s, it.type === 'golden', it.t || 0);
+  else if (it.type === 'base') drawIngredient(g, f.base, it.s, false, it.t || 0);
   else if (it.type === 'stone') drawStone(g, it.s, it.poly);
   else drawHusk(g, it.s);
   g.restore();
@@ -966,11 +1313,11 @@ function drawBasket(g, b, fill) {
   g.fillStyle = 'rgba(42, 61, 28, .24)'; g.beginPath(); g.ellipse(x, bot + 3, w * 0.42, h * 0.1, 0, 0, Math.PI * 2); g.fill();
   if (fill > 0) {
     const mh = Math.min(1, fill / 26) * h * 0.55;
-    g.fillStyle = '#8E522D';
+    g.fillStyle = cur().hero.mound;
     g.beginPath(); g.moveTo(x - w * 0.45, top + 3); g.quadraticCurveTo(x, top - mh * 2, x + w * 0.45, top + 3); g.closePath(); g.fill();
     for (let i = 0; i < 15; i++) {
       const u = i / 14, fx = x + (u - 0.5) * w * 0.8, fy = top - Math.sin(u * Math.PI) * mh * 0.85 + 2 + (i % 3);
-      g.fillStyle = i % 3 === 0 ? '#E0B04F' : '#5E2D16'; g.beginPath(); g.arc(fx, fy, 2.1, 0, Math.PI * 2); g.fill();
+      g.fillStyle = i % 3 === 0 ? cur().base.dot : cur().hero.dot; g.beginPath(); g.arc(fx, fy, 2.1, 0, Math.PI * 2); g.fill();
     }
   }
   const grd = g.createLinearGradient(0, top, 0, bot);
@@ -986,11 +1333,11 @@ function drawBasket(g, b, fill) {
   g.strokeStyle = 'rgba(255, 236, 196, .28)'; g.lineWidth = 3;
   for (let i = -6; i <= 6; i++) { const xx = x + i * w * 0.085; g.beginPath(); g.moveTo(xx, top); g.lineTo(xx - (xx - x) * 0.2, bot); g.stroke(); }
   g.restore();
-  g.fillStyle = '#4E6B2E'; roundRectPath(g, x - w / 2 - 4, top - 6, w + 8, 11, 5.5); g.fill();
+  g.fillStyle = cur().b.pack.pk; roundRectPath(g, x - w / 2 - 4, top - 6, w + 8, 11, 5.5); g.fill();
   g.fillStyle = 'rgba(255, 250, 238, .25)'; roundRectPath(g, x - w / 2, top - 5, w, 3, 1.5); g.fill();
   const lw = w * 0.4, lh = Math.max(14, h * 0.3), ly = top + h * 0.27;
   g.fillStyle = '#FFFAEE'; roundRectPath(g, x - lw / 2, ly, lw, lh, 4); g.fill();
-  g.fillStyle = '#2A3D1C'; g.font = `700 ${Math.round(lh * 0.52)}px Hind, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillStyle = cur().b.pack.deep; g.font = `700 ${Math.round(lh * 0.52)}px Hind, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.fillText('by IBP', x, ly + lh / 2 + 1);
   g.restore();
 }
@@ -1038,19 +1385,35 @@ function hills(g, baseY, amp, color, phase, freq) {
   }
   g.lineTo(W, H); g.closePath(); g.fill();
 }
+function fitFont(g, text, maxW, size, min, face) {
+  for (let s = size; s >= min; s -= 0.5) { g.font = face(s); if (g.measureText(text).width <= maxW) return; }
+}
 function drawSign(g, x, y) {
+  const { f, hero } = cur();
   g.fillStyle = '#7A5A36'; g.fillRect(x - 2.5, y, 5, 46);
-  const bw = 96, bh = 52, bx = x - bw / 2, by = y - bh + 8;
+  const bw = 104, bh = 54, bx = x - bw / 2, by = y - bh + 8;
   g.fillStyle = 'rgba(42, 61, 28, .2)'; roundRectPath(g, bx + 3, by + 3, bw, bh, 6); g.fill();
   g.fillStyle = '#FBF3DF'; roundRectPath(g, bx, by, bw, bh, 6); g.fill();
   g.strokeStyle = '#4E6B2E'; g.lineWidth = 2; roundRectPath(g, bx + 3, by + 3, bw - 6, bh - 6, 4); g.stroke();
   g.textAlign = 'center'; g.textBaseline = 'middle';
   g.fillStyle = '#4E6B2E'; g.font = '700 8.5px Hind, sans-serif';
   g.fillText('PARTNER FARM', x, by + 13);
-  g.fillStyle = '#7A3E22'; g.font = '700 14px Kalam, cursive';
-  g.fillText('Karnataka', x, by + 27);
-  g.fillStyle = '#2A3D1C'; g.font = '600 11px "Noto Sans Kannada", "Kannada Sangam MN", "Nirmala UI", Tunga, sans-serif';
-  g.fillText('ರಾಗಿ · ragi', x, by + 41);
+  g.fillStyle = '#7A3E22'; fitFont(g, f.origin, bw - 12, 14, 9, (s) => `700 ${s}px Kalam, cursive`);
+  g.fillText(f.origin, x, by + 28);
+  const line = `${f.local} · ${hero.one}`;
+  g.fillStyle = '#2A3D1C'; fitFont(g, line, bw - 12, 11, 8, (s) => `600 ${s}px ${SCRIPT_FONT[f.lang]}`);
+  g.fillText(line, x, by + 42);
+}
+function drawPalm(g, x, y, h, color) {
+  g.strokeStyle = color; g.lineCap = 'round'; g.lineWidth = Math.max(1.5, h * 0.06);
+  g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + h * 0.12, y - h * 0.5, x + h * 0.05, y - h); g.stroke();
+  const tx = x + h * 0.05, ty = y - h;
+  g.lineWidth = Math.max(1.2, h * 0.045);
+  for (const a of [-2.75, -2.25, -1.6, -0.95, -0.4]) {
+    g.beginPath(); g.moveTo(tx, ty);
+    g.quadraticCurveTo(tx + Math.cos(a) * h * 0.3, ty + Math.sin(a) * h * 0.3 - h * 0.05, tx + Math.cos(a) * h * 0.5, ty + Math.sin(a) * h * 0.2 + h * 0.14);
+    g.stroke();
+  }
 }
 function buildFarmBg() {
   const c = document.createElement('canvas');
@@ -1067,7 +1430,10 @@ function buildFarmBg() {
   g.fillStyle = '#F2D48A'; g.beginPath(); g.arc(sx, sy, sr, 0, Math.PI * 2); g.fill();
   hills(g, H * 0.33, H * 0.035, '#C5D0A5', 0.9, 2.2);
   hills(g, H * 0.39, H * 0.028, '#A0B57A', 1.7, 1.4);
-  const fy = H * 0.43;
+  if (['cocoa', 'coconut', 'vanilla'].includes(cur().f.hero)) {
+    for (const [u, hh] of [[0.36, 0.085], [0.47, 0.11], [0.6, 0.075], [0.9, 0.1]]) drawPalm(g, W * u, H * (0.405 - u * 0.012), H * hh, '#6E8A4A');
+  }
+  const fy = H * 0.43, crop = cur().hero.crop;
   let y = fy, row = 0;
   while (y < H) {
     const d = (y - fy) / (H - fy);
@@ -1080,7 +1446,7 @@ function buildFarmBg() {
       const bx = x + Math.sin(x * 0.37 + row) * gap * 0.15, base = y + hgt * 0.92;
       g.strokeStyle = '#3E5826'; g.lineWidth = Math.max(0.7, sz * 0.16);
       g.beginPath(); g.moveTo(bx, base); g.lineTo(bx - sz * 0.25, base - sz); g.moveTo(bx, base); g.lineTo(bx + sz * 0.28, base - sz * 0.9); g.stroke();
-      g.fillStyle = '#7A3E22';
+      g.fillStyle = crop;
       g.beginPath(); g.arc(bx - sz * 0.25, base - sz, sz * 0.2, 0, Math.PI * 2); g.arc(bx + sz * 0.28, base - sz * 0.9, sz * 0.17, 0, Math.PI * 2); g.fill();
     }
     g.globalAlpha = 1;
@@ -1105,7 +1471,7 @@ const Ambient = {
   items: [],
   update(dt) {
     if (this.items.length < 7 && Math.random() < dt * 2.2) {
-      const type = Math.random() < 0.55 ? 'ragi' : 'millet';
+      const type = Math.random() < 0.55 ? 'hero' : 'base';
       this.items.push({ type, x: rand(24, W - 24), y: -30, vy: rand(28, 52), rot: rand(-0.5, 0.5), vr: rand(-0.6, 0.6), s: rand(24, 34), t: 0 });
     }
     for (const it of this.items) { it.y += it.vy * dt; it.rot += it.vr * dt; it.t += dt; }
@@ -1128,8 +1494,9 @@ const Harvest = {
   enter() {
     this.items = []; this.parts = []; this.floats = []; this.t = 0; this.spawnT = 0.35;
     const b = this.basket; b.x = b.tx = W / 2; b.squash = b.shake = 0;
-    showScene('canvas'); setPills(['ragi', 'millet']);
-    canvas.setAttribute('aria-label', 'Harvest at a partner farm in Karnataka. Drag, swipe or use the arrow keys to move the basket. Catch ragi and millet; avoid stones and husk.');
+    showScene('canvas'); setPills(['hero', 'base']);
+    const { f, hero, base } = cur();
+    canvas.setAttribute('aria-label', `Harvest at a partner farm in ${f.origin}. Drag, swipe or use the arrow keys to move the basket. Catch ${hero.one} and ${base.one}; avoid stones and husk.`);
   },
   start() {},
   update(dt) {
@@ -1159,9 +1526,9 @@ const Harvest = {
   },
   spawn(p) {
     const r = Math.random();
-    const type = r < 0.38 ? 'ragi' : r < 0.72 ? 'millet' : r < 0.78 ? 'golden' : r < 0.91 ? 'stone' : 'husk';
+    const type = r < 0.38 ? 'hero' : r < 0.72 ? 'base' : r < 0.78 ? 'golden' : r < 0.91 ? 'stone' : 'husk';
     const s = this.size * (type === 'stone' ? 0.82 : type === 'husk' ? 0.88 : 1);
-    const speed = { ragi: 1, millet: 1, golden: 1.2, stone: 1.1, husk: 0.75 }[type];
+    const speed = { hero: 1, base: 1, golden: 1.2, stone: 1.1, husk: 0.75 }[type];
     const x0 = rand(s * 0.7, W - s * 0.7);
     this.items.push({
       type, x: x0, x0, y: -s, s, r: s * 0.5,
@@ -1172,24 +1539,24 @@ const Harvest = {
     });
   },
   collect(it) {
-    const inv = GameState.inventory, h = GameState.harvest, b = this.basket;
+    const inv = GameState.inventory, h = GameState.harvest, b = this.basket, { hero, base } = cur();
     const fx = clamp(it.x, 48, W - 48), fy = b.y - b.h * 0.95, by = b.y - b.h * 0.45;
     switch (it.type) {
-      case 'ragi':
-        inv.ragi++; h.ragi++; addScore(10);
-        floatText(this.floats, '+1 ragi', fx, fy, 'ok'); burst(this.parts, it.x, by, '#7A3E22', 6);
-        Sound.pick(0); buzz(8); b.squash = 1; popPill('ragi'); break;
-      case 'millet':
-        inv.millet++; h.millet++; addScore(10);
-        floatText(this.floats, '+1 millet', fx, fy, 'ok'); burst(this.parts, it.x, by, '#D9A441', 6);
-        Sound.pick(3); buzz(8); b.squash = 1; popPill('millet'); break;
+      case 'hero':
+        inv.hero++; h.hero++; addScore(10);
+        floatText(this.floats, `+1 ${hero.one}`, fx, fy, 'ok'); burst(this.parts, it.x, by, hero.color, 6);
+        Sound.pick(0); buzz(8); b.squash = 1; popPill('hero'); break;
+      case 'base':
+        inv.base++; h.base++; addScore(10);
+        floatText(this.floats, `+1 ${base.one}`, fx, fy, 'ok'); burst(this.parts, it.x, by, base.color, 6);
+        Sound.pick(3); buzz(8); b.squash = 1; popPill('base'); break;
       case 'golden':
-        inv.ragi += 3; h.golden++; addScore(40);
-        floatText(this.floats, 'Golden ragi +3', fx, fy, 'gold'); burst(this.parts, it.x, by, '#E8BE55', 16, true);
-        Sound.golden(); buzz([10, 30, 10]); b.squash = 1.3; popPill('ragi'); break;
+        inv.hero += 3; h.golden++; addScore(40);
+        floatText(this.floats, `Golden ${hero.one} +3`, fx, fy, 'gold'); burst(this.parts, it.x, by, '#E8BE55', 16, true);
+        Sound.golden(); buzz([10, 30, 10]); b.squash = 1.3; popPill('hero'); break;
       case 'stone': {
-        h.stones++; const lost = inv.ragi > 0 ? 1 : 0; inv.ragi -= lost; addScore(-15);
-        floatText(this.floats, lost ? 'Stone! −1 ragi' : 'Stone!', fx, fy, 'bad');
+        h.stones++; const lost = inv.hero > 0 ? 1 : 0; inv.hero -= lost; addScore(-15);
+        floatText(this.floats, lost ? `Stone! −1 ${hero.one}` : 'Stone!', fx, fy, 'bad');
         Sound.thud(); buzz([25, 40, 25]); b.shake = 1; break;
       }
       default:
@@ -1204,7 +1571,7 @@ const Harvest = {
     ctx.drawImage(this.bg, 0, 0, W, H);
     if (GameState.phase === 'title') { for (const it of Ambient.items) drawItem(ctx, it); return; }
     for (const it of this.items) drawItem(ctx, it);
-    drawBasket(ctx, this.basket, GameState.inventory.ragi + GameState.inventory.millet);
+    drawBasket(ctx, this.basket, GameState.inventory.hero + GameState.inventory.base);
     drawFx(ctx, this.parts, this.floats);
   },
 };
@@ -1225,12 +1592,12 @@ const Bake = {
   baking: false, bakeP: 0, bakeDur: 2.6, zone: [0.62, 0.79],
   orderStartAt: 0, nextId: 1, emptyAtStart: false, chipOptions: [],
   enter() {
-    showScene('bake'); setPills(['ragi', 'millet', 'stars']);
+    showScene('bake'); setPills(['hero', 'base', 'stars']);
     canvas.setAttribute('aria-label', '');
     this.queue = []; this.active = null; this.step = 0; this.millTaps = 0; this.locked = false; this.baking = false; this.nextId = 1;
     while (this.queue.length < 3) this.queue.push(this.newOrder());
     const max = this.maxCookies();
-    el.bakeCap.textContent = max > 0 ? `Your harvest makes ${plural(max, 'cookie')}` : 'Your basket is empty';
+    el.bakeCap.textContent = max > 0 ? `Your harvest makes ${plural(max, cur().b.noun)}` : 'Your basket is empty';
     this.emptyAtStart = max <= 0;
     if (this.emptyAtStart) { this.active = null; this.showEmpty(0); this.renderOrders(); }
     else this.activate();
@@ -1238,7 +1605,7 @@ const Bake = {
   start() { if (this.emptyAtStart) this.pantryEmpty(); },
   maxCookies() {
     const inv = GameState.inventory;
-    return Math.max(0, Math.min(Math.floor(inv.ragi / RECIPE.ragi), Math.floor(inv.millet / RECIPE.millet)));
+    return Math.max(0, Math.min(inv.hero, inv.base));                // one of each per cookie
   },
   newOrder() { const r = Math.random(); return { id: this.nextId++, qty: r < 0.5 ? 1 : r < 0.88 ? 2 : 3, cut: false }; },
   /* Take the next ticket; shrink it if the pantry (your harvest) can't cover it. */
@@ -1255,15 +1622,15 @@ const Bake = {
     this.step = i;
     [el.stMill, el.stMix, el.stBake, el.stPack, el.stEmpty].forEach((s, k) => { s.hidden = k !== i; });
     el.steps.forEach((li, k) => { li.classList.toggle('is-done', k < i); li.classList.toggle('is-active', k === i); });
-    const o = this.active;
+    const o = this.active, { b, f, hero, base, tool } = cur();
     if (i === 0) {
       this.millTaps = 0;
       el.millstone.style.setProperty('--turn', '0deg');
       this.renderMillDots();
-      el.millHint.textContent = `Tap the millstone 3 times to grind ${o.qty * RECIPE.ragi} ragi into flour`;
+      el.millHint.textContent = fillIn(tool.hint, { n: o.qty, hero: hero.one });
     } else if (i === 1) {
       el.bowl.classList.remove('is-stirring');
-      el.mixHint.textContent = `Add the grain for ${RECIPE.name} ×${o.qty}`;
+      el.mixHint.textContent = `Add the ${base.one} for ${f.name} ×${o.qty}`;
       this.renderChips();
     } else if (i === 2) {
       this.baking = false; this.bakeP = 0;
@@ -1275,31 +1642,33 @@ const Bake = {
       this.renderBake();
     } else if (i === 3) {
       el.pouch.classList.remove('is-sealed');
-      el.packHint.textContent = `Tap the pouch to pack and seal ${plural(o.qty, 'cookie')}`;
+      el.packHint.textContent = `Tap the pack to seal ${plural(o.qty, b.noun)}`;
     }
   },
   canAct(i) { return GameState.phase === 'bake' && GameState.running && !this.locked && !!this.active && this.step === i; },
 
-  /* Station 1: Mill — three taps grind the ragi. */
+  /* Station 1: Mill, Melt, Grate or Whip — three taps prepare the hero ingredient. */
   tapMill() {
     if (!this.canAct(0)) return;
     this.millTaps++;
     el.millstone.style.setProperty('--turn', (this.millTaps * 120) + 'deg');
     this.renderMillDots(); Sound.grind(); buzz(6);
     const c = centerOf(el.millstone);
-    spawnBits('flour', 7, c.x, c.y - c.h * 0.1, { spread: 70, dyMin: -60, dyMax: 30, life: 650 });
+    spawnBits('flour', 7, c.x, c.y - c.h * 0.1, { spread: 70, dyMin: -60, dyMax: 30, life: 650, colors: cur().tool.bits });
     if (this.millTaps >= 3) {
-      GameState.inventory.ragi -= this.active.qty * RECIPE.ragi;
-      popPill('ragi');
+      GameState.inventory.hero -= this.active.qty;
+      popPill('hero');
       this.locked = true;
       later(240, () => { this.locked = false; this.showStation(1); });
     }
   },
   renderMillDots() { el.millDots.forEach((d, k) => d.classList.toggle('on', k < this.millTaps)); },
 
-  /* Station 2: Mix — pick the right grain; anything else is rejected. */
+  /* Station 2: Mix — pick the right ingredient; anything else is rejected. */
   renderChips() {
-    const options = shuffle([{ id: 'millet', label: 'Millet', ok: true }, ...shuffle(DISTRACTORS.slice()).slice(0, 2).map((d) => ({ ...d, ok: false }))]);
+    const { f, base } = cur();
+    const wrong = shuffle(f.wrong.slice()).slice(0, 2).map((id) => ({ id, label: ITEMS[id] ? ITEMS[id].label : EXTRAS[id], ok: false }));
+    const options = shuffle([{ id: f.base, label: base.label, ok: true }, ...wrong]);
     this.chipOptions = options;
     el.chips.innerHTML = '';
     options.forEach((o) => {
@@ -1314,8 +1683,8 @@ const Bake = {
     if (!this.canAct(1)) return;
     Sound.tap();
     if (!o.ok) { this.reject('wrong', o.label); return; }
-    GameState.inventory.millet -= this.active.qty * RECIPE.millet;
-    popPill('millet');
+    GameState.inventory.base -= this.active.qty;
+    popPill('base');
     this.locked = true;
     el.bowl.classList.add('is-stirring'); Sound.stir();
     later(560, () => { this.locked = false; this.showStation(2); });
@@ -1344,7 +1713,7 @@ const Bake = {
   renderBake() {
     const p = this.bakeP, [z0, z1] = this.zone;
     el.bakebar.style.setProperty('--p', (p * 100).toFixed(1) + '%');
-    el.ovenCookie.style.setProperty('--cookie', cookieColor(p, z0, z1));
+    el.ovenCookie.style.setProperty('--cookie', cookieColor(p, z0, z1, cur().f.colors));
     el.stBake.classList.toggle('in-zone', this.baking && p >= z0 && p <= z1);
   },
 
@@ -1360,8 +1729,8 @@ const Bake = {
     GameState.bake.orders++; GameState.bake.cookies += o.qty; GameState.packs += o.qty;
     popPill('stars');
     const c = centerOf(el.pouch);
-    spawnBits('bit', 22, c.x, c.y - c.h * 0.3, { spread: 150, dyMin: -150, dyMax: 60, colors: ['#C99A3B', '#4E6B2E', '#F0D38A', '#8DA567'], life: 900 });
-    toast(`Packed ${RECIPE.name} ×${o.qty}` + (bonus ? `  ·  +${bonus} speed bonus` : ''), 1200);
+    spawnBits('bit', 22, c.x, c.y - c.h * 0.3, { spread: 150, dyMin: -150, dyMax: 60, colors: cur().b.confetti, life: 900 });
+    toast(`Packed ${cur().f.name} ×${o.qty}` + (bonus ? `  ·  +${bonus} speed bonus` : ''), 1200);
     announce(`Order packed. ${plural(GameState.bake.orders, 'star')}.`);
     later(560, () => {
       this.locked = false;
@@ -1388,11 +1757,11 @@ const Bake = {
     const reasons = {
       burnt: 'Burnt. Take it out while the marker is in the golden zone.',
       under: 'Underbaked. Wait for the golden zone before you take it out.',
-      wrong: `Wrong ingredient. ${detail} is not in ${RECIPE.name}.`,
+      wrong: `Wrong ingredient. ${detail} is not in ${cur().f.name}.`,
     };
     showQC(reasons[kind]);
     Sound.reject(); buzz([40, 40, 40]);
-    announce('Rejected. Only perfect cookies leave an IBP kitchen. ' + reasons[kind]);
+    announce(`Rejected. Only perfect ${cur().b.noun}s leave an IBP kitchen. ` + reasons[kind]);
     later(1500, () => { hideQC(); this.locked = false; this.restartOrder(); });
   },
   restartOrder() {
@@ -1416,14 +1785,15 @@ const Bake = {
     [el.stMill, el.stMix, el.stBake, el.stPack].forEach((s) => { s.hidden = true; });
     el.stEmpty.hidden = false;
     el.steps.forEach((li) => li.classList.remove('is-active', 'is-done'));
-    const inv = GameState.inventory;
-    const short = inv.millet < RECIPE.millet && inv.ragi >= RECIPE.ragi ? 'millet' : inv.ragi < RECIPE.ragi && inv.millet >= RECIPE.millet ? 'ragi' : '';
-    if (GameState.bake.orders > 0 && !short) el.emptyMsg.textContent = 'Pantry empty. Every grain you harvested is baked and packed.';
-    else if (short) el.emptyMsg.textContent = `Out of ${short}. ${RECIPE.name} needs both grains, so the kitchen closes early.`;
-    else el.emptyMsg.textContent = 'Not enough grain to bake. Catch more on the farm next time.';
+    const inv = GameState.inventory, { f, hero, base } = cur();
+    const short = inv.base < 1 && inv.hero >= 1 ? base.one : inv.hero < 1 && inv.base >= 1 ? hero.one : '';
+    if (GameState.bake.orders > 0 && !short) el.emptyMsg.textContent = 'Pantry empty. Everything you harvested is baked and packed.';
+    else if (short) el.emptyMsg.textContent = `Out of ${short}. ${f.name} needs both, so the kitchen closes early.`;
+    else el.emptyMsg.textContent = 'Not enough to bake. Catch more on the farm next time.';
     el.emptyBonus.textContent = bonus ? `Time bonus +${bonus}` : 'Heading out to deliver…';
   },
   renderOrders() {
+    const { f, hero, base } = cur();
     el.orders.innerHTML = '';
     this.queue.forEach((o) => {
       const t = document.createElement('div');
@@ -1431,9 +1801,9 @@ const Bake = {
       t.className = 'ticket' + (isActive ? ' is-active' : '');
       t.style.setProperty('--tilt', (((o.id * 37) % 5) - 2) * 0.7 + 'deg');
       t.innerHTML = `<span class="t-tag">${isActive ? 'Baking now' : 'Next'}</span>`
-        + `<span class="t-name">${RECIPE.name}</span>`
+        + `<span class="t-name">${escapeHtml(f.name)}</span>`
         + `<span class="t-qty">×${o.qty}</span>`
-        + `<span class="t-need">${o.qty * RECIPE.ragi} ragi · ${o.qty * RECIPE.millet} millet${o.cut ? '<br>cut to fit your harvest' : ''}</span>`;
+        + `<span class="t-need">${o.qty} ${hero.one} · ${o.qty} ${base.one}${o.cut ? '<br>cut to fit your harvest' : ''}</span>`;
       el.orders.appendChild(t);
     });
   },
@@ -1515,6 +1885,7 @@ function drawHole(g, cx, cy, w, h, seed) {
   g.restore();
 }
 function drawTruck(g, x, y, w, h) {
+  const pk = cur().b.pack;
   g.save(); g.translate(x, y);
   g.fillStyle = 'rgba(0, 0, 0, .25)'; roundRectPath(g, -w / 2 + 4, -h / 2 + 7, w, h, 8); g.fill();
   g.fillStyle = '#1E2418';
@@ -1522,12 +1893,12 @@ function drawTruck(g, x, y, w, h) {
   [[-1, -0.3], [1, -0.3], [-1, 0.32], [1, 0.32]].forEach(([sx, sy]) => { roundRectPath(g, sx * (w / 2) - ww / 2, sy * h - wh / 2, ww, wh, 3); g.fill(); });
   g.fillStyle = '#FFFAEE'; roundRectPath(g, -w / 2, -h * 0.18, w, h * 0.68, 6); g.fill();
   g.strokeStyle = 'rgba(42, 61, 28, .25)'; g.lineWidth = 1; g.stroke();
-  g.fillStyle = '#4E6B2E'; g.fillRect(-w / 2, h * 0.3, w, h * 0.06);
-  g.fillStyle = '#2A3D1C'; g.font = `400 ${Math.round(w * 0.36)}px "Rozha One", Georgia, serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillStyle = pk.pk; g.fillRect(-w / 2, h * 0.3, w, h * 0.06);
+  g.fillStyle = pk.deep; g.font = `400 ${Math.round(w * 0.36)}px "Rozha One", Georgia, serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.fillText('IBP', 0, h * 0.13);
-  drawLeaf(g, 0, -h * 0.05, w * 0.1, '#4E6B2E');
-  g.fillStyle = '#4E6B2E'; roundRectPath(g, -w / 2 + 2, -h / 2, w - 4, h * 0.34, 8); g.fill();
-  g.fillStyle = '#CFE0C0'; roundRectPath(g, -w / 2 + 6, -h / 2 + h * 0.05, w - 12, h * 0.11, 4); g.fill();
+  if (GameState.brand === 'nutrielle') drawLeaf(g, 0, -h * 0.05, w * 0.1, pk.pk);
+  g.fillStyle = pk.pk; roundRectPath(g, -w / 2 + 2, -h / 2, w - 4, h * 0.34, 8); g.fill();
+  g.fillStyle = 'rgba(255, 250, 238, .7)'; roundRectPath(g, -w / 2 + 6, -h / 2 + h * 0.05, w - 12, h * 0.11, 4); g.fill();
   g.fillStyle = '#F0D38A'; g.fillRect(-w / 2 + 5, -h / 2 + 1, 5, 3); g.fillRect(w / 2 - 10, -h / 2 + 1, 5, 3);
   g.restore();
 }
@@ -1673,50 +2044,98 @@ const dctx = detectCanvas.getContext('2d', { willReadFrequently: true });
 
 const Bite = {
   stream: null, done: false, samples: 0, base: 0, baseN: 0, prev: null, hits: 0, detectT: 0, openToken: 0,
+  torn: false, tearP: 0, ripStep: 0, useCam: false, camFail: '', waiting: false, waitT: 0,
   enter() {
     showScene('bite'); setPills([]);
-    this.done = false; this.samples = 0; this.base = 0; this.baseN = 0; this.prev = null; this.hits = 0; this.detectT = 0;
+    Object.assign(this, { done: false, samples: 0, base: 0, baseN: 0, prev: null, hits: 0, detectT: 0, torn: false, tearP: 0, ripStep: 0, camFail: '', waiting: false, waitT: 0 });
+    tearDrag.on = false;
+    const { b, f } = cur();
     el.cam.hidden = true; el.tapBite.hidden = true; el.biteWait.hidden = true;
     [el.camCookie, el.bigCookie].forEach((c) => c.classList.remove('is-bitten'));
     el.crunchWord.classList.remove('is-on');
     el.biteStage.style.setProperty('--p', '0');
+    el.biteStage.hidden = true; el.biteStage.classList.remove('is-in');
+    el.tear.hidden = false; el.tearBtn.hidden = false;
+    el.tearPack.classList.remove('is-open', 'is-tearing', 'is-nudge');
+    el.tearPack.style.setProperty('--tp', '0');
+    el.biteTitle.textContent = 'Your pack has arrived';
+    el.biteSub.textContent = 'Swipe along the arrow to tear it open';
+    el.biteNote.textContent = `${b.name} ${f.name}, straight from ${f.origin}.`;
     const st = GameState.cameraStatus;
-    if ((st === 'granted' || st === 'unknown') && hasCamera()) this.openCamera();
-    else this.showFallback(st === 'off' ? 'off' : 'denied');
+    this.useCam = (st === 'granted' || st === 'unknown') && hasCamera();
+    if (this.useCam) this.openCamera();                     // warms up behind the pack
+    else this.camFail = st === 'off' ? 'off' : 'denied';
   },
   start() {},
+
+  /* The pack: swipe from the scissors along the arrow. */
+  setTear(p) {
+    if (this.torn || this.done) return;
+    this.tearP = clamp(Math.max(this.tearP, p), 0, 1);
+    el.tearPack.style.setProperty('--tp', this.tearP.toFixed(3));
+    const step = Math.floor(this.tearP * 5);
+    if (step > this.ripStep) { this.ripStep = step; Sound.rip(); buzz(4); }
+    if (this.tearP >= 0.86) this.tearOpen('swipe');
+  },
+  tearOpen(method) {
+    if (this.torn || this.done) return;
+    this.torn = true; tearDrag.on = false;
+    GameState.tearMethod = method;
+    addScore(method === 'swipe' ? 40 : method === 'button' ? 25 : 0);
+    el.tearPack.style.setProperty('--tp', '1');
+    el.tearPack.classList.add('is-open');
+    el.tearBtn.hidden = true;
+    Sound.tear(); buzz([10, 25, 15]);
+    el.biteSub.textContent = method === 'auto' ? 'We opened it for you' : 'Torn open!';
+    announce(method === 'auto' ? 'We opened the pack for you. Open wide for the first bite.' : 'Pack torn open. Open wide for the first bite.');
+    later(700, () => this.reveal());
+  },
+  /* Out of the pack and into the camera: the bite view opens where the pack was cut. */
+  reveal() {
+    if (this.done) return;
+    el.tear.hidden = true;
+    el.biteStage.hidden = false;
+    el.biteStage.classList.remove('is-in'); void el.biteStage.offsetWidth; el.biteStage.classList.add('is-in');
+    el.biteTitle.textContent = 'Open wide!';
+    if (this.stream) this.showCam();
+    else if (this.useCam && !this.camFail) { this.waiting = true; this.waitT = 0; el.biteWait.hidden = false; el.biteSub.textContent = 'Starting your camera…'; }
+    else this.showFallback(this.camFail || 'denied');
+  },
+  showCam() {
+    this.waiting = false;
+    el.biteWait.hidden = true; el.tapBite.hidden = true; el.cam.hidden = false;
+    el.biteSub.textContent = `Open wide for your first bite of ${cur().f.name}`;
+    el.biteNote.textContent = 'Or tap the picture. Your camera stays on your phone; nothing is recorded or uploaded.';
+  },
   async openCamera() {
     const token = ++this.openToken;
-    el.biteWait.hidden = false;
-    el.biteSub.textContent = 'Starting your camera…';
-    const slow = setTimeout(() => { if (token === this.openToken && !this.stream && !this.done) this.showFallback('slow'); }, 1500);
     try {
       const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 320 }, height: { ideal: 240 } }, audio: false });
-      clearTimeout(slow);
       if (token !== this.openToken || this.done || GameState.stageIndex !== 3) { s.getTracks().forEach((t) => t.stop()); return; }
       this.stream = s;
       GameState.cameraStatus = 'granted';
       el.video.srcObject = s;
       try { await el.video.play(); } catch (e) { /* autoplay of a muted stream normally works */ }
-      el.biteWait.hidden = true; el.tapBite.hidden = true; el.cam.hidden = false;
-      el.biteSub.textContent = 'Open wide for the first bite';
-      el.biteNote.textContent = 'Or tap the picture. Your camera stays on your phone; nothing is recorded or uploaded.';
+      if (this.torn && !this.done && !el.biteStage.hidden && el.cam.hidden && el.tapBite.hidden) this.showCam();
     } catch (e) {
-      clearTimeout(slow);
       GameState.cameraStatus = 'denied';
-      if (token === this.openToken && !this.done) this.showFallback('denied');
+      this.camFail = 'denied';
+      if (token === this.openToken && this.waiting && !this.done) this.showFallback('denied');
     }
   },
   showFallback(reason) {
+    this.waiting = false;
     el.cam.hidden = true; el.biteWait.hidden = true; el.tapBite.hidden = false;
-    el.biteSub.textContent = 'Tap the cookie to take the first bite';
+    el.biteSub.textContent = `Tap the ${cur().b.noun} to take the first bite`;
     el.biteNote.textContent = reason === 'off' ? 'Camera bite is switched off, so tap instead.'
       : reason === 'slow' ? 'The camera is slow to start, so tap instead.'
       : "The camera isn't available here, so tap instead.";
   },
   update(dt) {
     el.biteStage.style.setProperty('--p', clamp(1 - GameState.stageTimeLeft / STAGES[3].dur, 0, 1).toFixed(3));
-    if (!this.stream || this.done) return;
+    if (!this.torn && GameState.stageTimeLeft <= AUTO_TEAR_AT) this.tearOpen('auto');
+    if (this.waiting) { this.waitT += dt; if (this.waitT > 1.5) { this.camFail = 'slow'; this.showFallback('slow'); } }
+    if (!this.stream || this.done || el.cam.hidden) return;
     this.detectT += dt;
     if (this.detectT >= 0.09) { this.detectT = 0; this.detect(); }
   },
@@ -1745,7 +2164,7 @@ const Bite = {
     if ((darker && diff > 4) || diff > 28) this.hits++; else this.hits = Math.max(0, this.hits - 1);
     if (this.hits >= 3) this.bite('camera');
   },
-  tapBite() { if (GameState.phase === 'bite' && GameState.running) this.bite('tap'); },
+  tapBite() { if (GameState.phase === 'bite' && GameState.running && this.torn && !el.biteStage.hidden) this.bite('tap'); },
   bite(method) {
     if (this.done) return;
     this.done = true;
@@ -1756,13 +2175,20 @@ const Bite = {
     const cookie = el.cam.hidden ? el.bigCookie : el.camCookie;
     cookie.classList.add('is-bitten');
     el.crunchWord.classList.add('is-on');
-    const c = centerOf(cookie);
-    spawnBits('crumb', 16, c.x + c.w * 0.3, c.y - c.h * 0.3, { spread: 90, dyMin: 30, dyMax: 150, life: 1000 });
+    const c = centerOf(cookie), col = cur().f.colors;
+    spawnBits('crumb', 16, c.x + c.w * 0.3, c.y - c.h * 0.3, { spread: 90, dyMin: 30, dyMax: 150, life: 1000, colors: [col.gold, col.raw, col.gold] });
     announce('Crunch!');
     this.stopCamera();
     later(1150, () => finishGame());
   },
-  timeUp() { this.bite('auto'); },
+  timeUp() {
+    if (!this.torn) { this.torn = true; GameState.tearMethod = 'auto'; }
+    if (el.biteStage.hidden) {
+      el.tear.hidden = true; el.biteStage.hidden = false;
+      if (this.stream) this.showCam(); else this.showFallback(this.camFail || 'slow');
+    }
+    this.bite('auto');
+  },
   stopCamera() {
     this.openToken++;
     if (this.stream) { this.stream.getTracks().forEach((t) => t.stop()); this.stream = null; }
@@ -1808,15 +2234,19 @@ function showScene(name) {
 }
 function setPills(list) { Object.keys(el.pills).forEach((k) => { el.pills[k].hidden = !list.includes(k); }); }
 
+function stageGoal(id) {
+  const { b, f, hero, base, tool } = cur();
+  if (id === 'harvest') return `Swipe the basket. Catch ${hero.one} and ${base.one}; let stones and husk fall.`;
+  if (id === 'bake') return `${tool.verb}, mix, bake, pack. Take each ${b.noun} out in the golden zone.`;
+  if (id === 'deliver') return 'Swipe to change lanes. Drive over the stores and dodge the potholes.';
+  return 'Swipe along the arrow to tear the pack open, then open wide for the first bite.';
+}
 function carryLine(id) {
-  const inv = GameState.inventory;
-  if (id === 'harvest') return 'A partner farm in Karnataka';
-  if (id === 'bake') {
-    const max = Math.max(0, Math.min(Math.floor(inv.ragi / RECIPE.ragi), Math.floor(inv.millet / RECIPE.millet)));
-    return `Your basket: ${inv.ragi} ragi · ${inv.millet} millet. That's ${plural(max, 'cookie')}.`;
-  }
+  const inv = GameState.inventory, { b, f, hero, base } = cur();
+  if (id === 'harvest') return `A partner farm in ${f.origin}`;
+  if (id === 'bake') return `Your basket: ${inv.hero} ${hero.one} · ${inv.base} ${base.one}. That's ${plural(Math.max(0, Math.min(inv.hero, inv.base)), b.noun)}.`;
   if (id === 'deliver') return `${plural(GameState.packs, 'pack')} on the IBP truck`;
-  return 'From the farm, through the kitchen, to you';
+  return `${b.name} ${f.name}, from the farm to you`;
 }
 
 let introDone = null;
@@ -1825,14 +2255,14 @@ function showIntro(i, done) {
   el.introKicker.textContent = `Stage ${i + 1} of ${STAGES.length}`;
   el.introTitle.textContent = st.name;
   el.introTime.textContent = st.dur + 's';
-  el.introGoal.textContent = st.goal;
+  el.introGoal.textContent = stageGoal(st.id);
   el.introCarry.textContent = carryLine(st.id);
   const ms = DEMO ? 1300 : i === 0 ? 2600 : 2100;
   el.intro.style.setProperty('--intro-ms', ms + 'ms');
   el.intro.hidden = false;
   el.intro.classList.remove('is-in'); void el.intro.offsetWidth; el.intro.classList.add('is-in');
   Sound.whoosh();
-  announce(`Stage ${i + 1}, ${st.name}. ${st.dur} seconds. ${st.goal}`);
+  announce(`Stage ${i + 1}, ${st.name}. ${st.dur} seconds. ${stageGoal(st.id)}`);
   let finished = false;
   const run = GameState.runId;
   const go = () => {
@@ -1877,11 +2307,23 @@ function endStage() {
 
 function startGame() {
   resetRun();
+  Bot.reset();
   el.title.hidden = true;
   el.sheet.hidden = true;
   el.hud.hidden = false;
   resizeCanvas();
   beginStage(0);
+}
+
+/* Back to the start screen to pick another biscuit. */
+function showTitle() {
+  GameState.phase = 'title'; GameState.running = false; GameState.stageIndex = -1;
+  Bite.stopCamera();
+  el.sheet.hidden = true; el.hud.hidden = true; el.intro.hidden = true;
+  el.game.dataset.stage = '';
+  showScene('canvas');
+  el.title.hidden = false;
+  applyBrand();
 }
 
 function finishGame() {
@@ -1901,16 +2343,18 @@ function finishGame() {
   el.rating.dataset.rating = String(rating);
   el.endScore.textContent = fmtNum(s);
   el.endBest.textContent = isBest && s > 0 ? 'points · new best' : `points · best ${fmtNum(GameState.best)}`;
-  const h = GameState.harvest, b = GameState.bake, d = GameState.delivered;
-  el.statFarm.textContent = `${h.ragi} ragi · ${h.millet} millet` + (h.golden ? ` · ${h.golden} golden` : '');
-  el.statKitchen.textContent = `${plural(b.orders, 'order')} · ${plural(b.cookies, 'cookie')}` + (b.rejects ? ` · ${plural(b.rejects, 'QC reject')}` : '');
+  const h = GameState.harvest, b = GameState.bake, d = GameState.delivered, sel = cur();
+  el.statFarm.textContent = `${h.hero} ${sel.hero.one} · ${h.base} ${sel.base.one}` + (h.golden ? ` · ${h.golden} golden` : '');
+  el.statKitchen.textContent = `${plural(b.orders, 'order')} · ${plural(b.cookies, sel.b.noun)}` + (b.rejects ? ` · ${plural(b.rejects, 'QC reject')}` : '');
   const drops = [];
   if (d.kirana) drops.push(`${d.kirana} kirana`);
   if (d.super) drops.push(`${d.super} supermarket`);
   if (d.qcom) drops.push(`${d.qcom} quick-commerce`);
   el.statRoad.textContent = drops.length ? drops.join(' · ') : 'No deliveries this time';
-  el.statYou.textContent = { camera: 'First bite, on camera', tap: 'First bite, by tap', auto: 'First bite, just in time' }[GameState.biteMethod] || 'First bite';
-  announce(`Finished. ${rating} out of 5 stars and ${s} points. Ragi and Millet, ragi from Karnataka, by IBP.`);
+  const opened = { swipe: 'Torn open', button: 'Opened', auto: 'Opened for you' }[GameState.tearMethod] || 'Opened';
+  const bit = { camera: 'first bite on camera', tap: 'first bite by tap', auto: 'first bite just in time' }[GameState.biteMethod] || 'first bite';
+  el.statYou.textContent = `${opened} · ${bit}`;
+  announce(`Finished. ${rating} out of 5 stars and ${s} points. ${sel.f.name}, ${sel.hero.one} from ${sel.f.origin}, by IBP.`);
 }
 
 /* =====================================================================
@@ -1932,16 +2376,17 @@ function selectText(node) {
   try { const r = document.createRange(); r.selectNodeContents(node); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } catch (e) { /* ignore */ }
 }
 function openOffer() {
-  openSheet('₹45 Trial Pack Offer', `
+  const { b, f } = cur();
+  openSheet(`₹${b.price} Trial Pack Offer`, `
     <div class="offer">
-      <span class="pouch" aria-hidden="true"><svg class="ico"><use href="#i-leaf"/></svg><span class="pouch-name">Nutrielle</span></span>
-      <div><p class="offer-name">Nutrielle Ragi &amp; Millet</p><p class="offer-meta">50g trial pack · ₹45</p></div>
+      <span class="pouch" aria-hidden="true"><svg class="ico"><use href="#${b.mark}"/></svg><span class="pouch-name">${b.name}</span></span>
+      <div><p class="offer-name">${b.name} ${escapeHtml(f.name)}</p><p class="offer-meta">${b.size} · ₹${b.price}</p></div>
     </div>
     <p class="sheet-p">Use this code at checkout on your quick-commerce app.</p>
-    <div class="code-row"><span class="offer-code" id="offerCode">${OFFER_CODE}</span><button class="btn btn-primary btn-small" id="copyCode" type="button">Copy code</button></div>
+    <div class="code-row"><span class="offer-code" id="offerCode">${b.code}</span><button class="btn btn-primary btn-small" id="copyCode" type="button">Copy code</button></div>
     <p class="sheet-fine">Prototype for IBP's launch press conference. This is a demo offer, not a live promotion.</p>`, el.offerBtn);
   onTap($('copyCode'), async () => {
-    try { await navigator.clipboard.writeText(OFFER_CODE); toast('Code copied'); }
+    try { await navigator.clipboard.writeText(b.code); toast('Code copied'); }
     catch (e) { selectText($('offerCode')); toast('Code selected. Copy it from here.'); }
   });
 }
@@ -1949,7 +2394,8 @@ async function shareScore() {
   const rating = Number(el.rating.dataset.rating || 1);
   const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
   const url = location.href.split('#')[0];
-  const text = `I took Nutrielle's Ragi & Millet from a partner farm in Karnataka to my first bite in 60 seconds. ${stars} · ${fmtNum(GameState.score)} points. Taste it. Trace it. #FarmToFirstBite`;
+  const { b, f } = cur();
+  const text = `I took ${b.name} ${f.name} from a partner farm in ${f.origin} to my first bite in 60 seconds. ${stars} · ${fmtNum(GameState.score)} points. Taste it. Trace it. #FarmToFirstBite`;
   try {
     if (navigator.share) { await navigator.share({ title: 'Farm to First Bite', text, url }); return; }
   } catch (e) { if (e && e.name === 'AbortError') return; }
@@ -1969,8 +2415,8 @@ function updateHud(force) {
   setText(el.stageTime, 'st', String(Math.ceil(GameState.stageTimeLeft)));
   setText(el.totalTime, 'tt', fmtTime(totalTimeLeft()));
   setText(el.score, 'sc', fmtNum(GameState.score));
-  setText(el.invRagi, 'ir', String(GameState.inventory.ragi));
-  setText(el.invMillet, 'im', String(GameState.inventory.millet));
+  setText(el.invHero, 'ih', String(GameState.inventory.hero));
+  setText(el.invBase, 'ib', String(GameState.inventory.base));
   setText(el.starCount, 'so', String(GameState.bake.orders));
   setText(el.packCount, 'pk', String(GameState.packs));
   const d = GameState.delivered;
@@ -1990,7 +2436,8 @@ function updateHud(force) {
    15. DEMO BOT (#demo) — plays the game for recording a clip
    ===================================================================== */
 const Bot = {
-  cool: 0, laneCool: 0, burned: false,
+  cool: 0, laneCool: 0, burned: false, tearT: 0,
+  reset() { this.cool = 0; this.laneCool = 0; this.burned = false; this.tearT = 0; },
   update(dt) {
     if (!GameState.running) return;
     this.cool -= dt; this.laneCool -= dt;
@@ -1998,7 +2445,7 @@ const Bot = {
     if (ph === 'harvest') this.harvest();
     else if (ph === 'bake') this.bake();
     else if (ph === 'deliver') this.deliver();
-    else if (ph === 'bite' && GameState.stageTimeLeft < 3.4) Bite.tapBite();
+    else if (ph === 'bite') this.bite(dt);
   },
   harvest() {
     const b = Harvest.basket, rim = b.y - b.h * 0.42, reachSpeed = 600;
@@ -2008,7 +2455,7 @@ const Bot = {
       const tLand = (rim - it.y) / it.vy;
       if (Math.abs(it.x - b.x) / reachSpeed > tLand + 0.05) continue;
       const inv = GameState.inventory;
-      const need = it.type === 'millet' ? (inv.millet <= inv.ragi ? 1.6 : 0.8) : it.type === 'golden' ? 3 : (inv.ragi <= inv.millet ? 1.6 : 0.8);
+      const need = it.type === 'base' ? (inv.base <= inv.hero ? 1.6 : 0.8) : it.type === 'golden' ? 3 : (inv.hero <= inv.base ? 1.6 : 0.8);
       const val = need / (0.2 + tLand);
       if (val > bestVal) { bestVal = val; best = it; }
     }
@@ -2031,6 +2478,11 @@ const Bot = {
       if (showQc) { if (Bake.bakeP > z1 + 0.06) { this.burned = true; Bake.pressBake(); this.cool = 0.2; } }
       else if (Bake.bakeP >= (z0 + z1) / 2) { Bake.pressBake(); this.cool = 0.25; }
     } else if (Bake.step === 3) { Bake.tapPack(); this.cool = 0.3; }
+  },
+  /* Swipe the pack open after a beat, then take the bite a little later. */
+  bite(dt) {
+    if (!Bite.torn) { this.tearT += dt; if (this.tearT > 0.8) Bite.setTear(Bite.tearP + dt * 2.2); }
+    else if (!el.biteStage.hidden && GameState.stageTimeLeft < 4.6) Bite.tapBite();
   },
   deliver() {
     if (this.laneCool > 0) return;
@@ -2103,6 +2555,119 @@ window.addEventListener('keyup', (e) => {
   if (e.key === 'ArrowRight') Keys.right = false;
 });
 
+/* Tearing the pack: press at the scissors (or where the cut stopped) and swipe along the arrow. */
+const tearDrag = { on: false };
+function tearAt(clientX, clientY) {
+  const r = el.tearLine.getBoundingClientRect(), pr = el.tearPack.getBoundingClientRect();
+  return { p: (clientX - r.left) / Math.max(1, r.width), near: Math.abs(clientY - r.top) <= Math.max(44, pr.height * 0.22) };
+}
+function tearStart(x, y) {
+  if (GameState.phase !== 'bite' || !GameState.running || Bite.torn) return false;
+  const { p, near } = tearAt(x, y);
+  if (!near || p > Bite.tearP + 0.32) {
+    el.tearPack.classList.remove('is-nudge'); void el.tearPack.offsetWidth; el.tearPack.classList.add('is-nudge');
+    el.biteSub.textContent = 'Start at the scissors and swipe along the arrow';
+    return true;
+  }
+  tearDrag.on = true;
+  el.tearPack.classList.add('is-tearing');
+  Bite.setTear(p);
+  return true;
+}
+function tearMove(x, y) { if (!tearDrag.on) return; const { p, near } = tearAt(x, y); if (near) Bite.setTear(p); }
+el.tearPack.addEventListener('touchstart', (e) => { const t = e.changedTouches[0]; if (tearStart(t.clientX, t.clientY)) e.preventDefault(); }, { passive: false });
+el.tearPack.addEventListener('touchmove', (e) => { e.preventDefault(); const t = e.changedTouches[0]; tearMove(t.clientX, t.clientY); }, { passive: false });
+el.tearPack.addEventListener('touchend', () => { tearDrag.on = false; });
+el.tearPack.addEventListener('touchcancel', () => { tearDrag.on = false; });
+el.tearPack.addEventListener('mousedown', (e) => { if (tearStart(e.clientX, e.clientY)) e.preventDefault(); });
+window.addEventListener('mousemove', (e) => { if (tearDrag.on) tearMove(e.clientX, e.clientY); });
+window.addEventListener('mouseup', () => { tearDrag.on = false; });
+
+/* Start screen: the biscuit and flavour picker restyles the whole game. */
+function setTreat(node, f, brandId) {
+  node.dataset.look = f.look;
+  node.style.setProperty('--cookie', f.colors.gold);
+  node.style.setProperty('--cream-fill', f.colors.cream || '#FFF4E0');
+  if (brandId === 'molten') node.setAttribute('data-melt', ''); else node.removeAttribute('data-melt');
+}
+function renderPicker() {
+  el.bcards.innerHTML = '';
+  Object.keys(BRANDS).forEach((id) => {
+    const b = BRANDS[id], lab = document.createElement('label');
+    lab.className = 'bcard'; lab.dataset.b = id;
+    lab.style.setProperty('--bc', b.pack.pk); lab.style.setProperty('--bcd', b.pack.deep);
+    lab.innerHTML = `<input type="radio" name="brand" value="${id}"><span class="treat" aria-hidden="true">${TREAT}</span><b>${b.name}</b><small>${b.blurb}</small>`;
+    setTreat(lab.querySelector('.treat'), b.flavours[0], id);
+    lab.querySelector('input').addEventListener('change', () => chooseBrand(id));
+    el.bcards.appendChild(lab);
+  });
+}
+function renderFlavours() {
+  const { b } = cur();
+  if (el.fchips.dataset.brand !== GameState.brand) {
+    el.fchips.dataset.brand = GameState.brand;
+    el.fchips.innerHTML = '';
+    b.flavours.forEach((f) => {
+      const lab = document.createElement('label');
+      lab.className = 'fchip'; lab.dataset.f = f.id;
+      lab.innerHTML = `<input type="radio" name="flavour" value="${f.id}"><b>${escapeHtml(f.name)}</b><small>${ITEMS[f.hero].one} from ${f.origin}</small>`;
+      lab.querySelector('input').addEventListener('change', () => chooseFlavour(f.id));
+      el.fchips.appendChild(lab);
+    });
+  }
+  el.fchips.querySelectorAll('.fchip').forEach((n) => { const on = n.dataset.f === GameState.flavour; n.classList.toggle('is-on', on); n.querySelector('input').checked = on; });
+}
+function chooseBrand(id) {
+  if (GameState.phase !== 'title' || !BRANDS[id]) return;
+  if (GameState.brand !== id) {
+    GameState.brand = id;
+    const last = GameState.lastFlavour[id];
+    GameState.flavour = BRANDS[id].flavours.some((f) => f.id === last) ? last : BRANDS[id].flavours[0].id;
+  }
+  Sound.init(); Sound.tap(); applyBrand(); savePrefs();
+}
+function chooseFlavour(fid) {
+  if (GameState.phase !== 'title') return;
+  GameState.flavour = fid; GameState.lastFlavour[GameState.brand] = fid;
+  Sound.init(); Sound.tap(); applyBrand(); savePrefs();
+}
+/* Push the picked biscuit into every screen: theme, words, icons, the pack and the treat. */
+function applyBrand() {
+  const { b, f, hero, base, tool } = cur();
+  el.game.dataset.brand = GameState.brand;
+  el.game.setAttribute('aria-label', `Farm to First Bite: ${b.name} ${f.name}, a 60-second IBP game`);
+  el.titleMark.setAttribute('href', '#' + b.mark); el.titleBrand.textContent = b.name;
+  el.titleP.textContent = `Take ${b.name} ${f.name} from a partner farm in ${f.origin} to your first bite. Harvest, bake, deliver, open, taste.`;
+  el.bcards.querySelectorAll('.bcard').forEach((n) => { const on = n.dataset.b === GameState.brand; n.classList.toggle('is-on', on); n.querySelector('input').checked = on; });
+  renderFlavours();
+  if (GameState.phase === 'title') canvas.setAttribute('aria-label', `A partner farm in ${f.origin}`);
+  el.heroIco.querySelector('use').setAttribute('href', '#' + hero.icon); el.heroIco.style.color = hero.color; el.heroWord.textContent = hero.one;
+  el.baseIco.querySelector('use').setAttribute('href', '#' + base.icon); el.baseIco.style.color = base.color; el.baseWord.textContent = base.one;
+  el.bakeTitle.textContent = `${b.name} Kitchen`; el.bake.setAttribute('aria-label', `${b.name} Kitchen`);
+  el.step1.textContent = tool.verb;
+  el.millstone.dataset.tool = f.tool;
+  el.millBtn.setAttribute('aria-label', fillIn(tool.aria, { hero: hero.one }));
+  el.bowl.style.setProperty('--dough', f.colors.dough); el.bowl.style.setProperty('--dough-hi', f.colors.doughHi);
+  el.pouchMark.setAttribute('href', '#' + b.mark); el.pouchName.textContent = b.name; el.pouchVar.textContent = f.name;
+  el.qcTitle.textContent = `Only perfect ${b.noun}s leave an IBP kitchen.`;
+  const arc = document.querySelector('#i-qc textPath'); if (arc) arc.textContent = b.qcArc;
+  [el.ovenCookie, el.camCookie, el.bigCookie, el.tpTreat].forEach((n) => setTreat(n, f, GameState.brand));
+  const s = el.tearPack.style, pk = b.pack;
+  s.setProperty('--pk', pk.pk); s.setProperty('--pk-deep', pk.deep); s.setProperty('--pk-label', pk.label); s.setProperty('--pk-ink', pk.ink); s.setProperty('--pk-accent', pk.accent);
+  el.tpMark.setAttribute('href', '#' + b.mark); el.tpName.textContent = b.name; el.tpVar.textContent = f.name; el.tpSize.textContent = `50g · ₹${b.price}`;
+  el.endMark.setAttribute('href', '#' + b.mark); el.endBrand.textContent = b.name;
+  el.endTitle.textContent = `Your ${b.noun} has an address`;
+  el.endLine.textContent = `${f.name} · ${hero.one} from ${f.origin} · by IBP`;
+  el.endFrom.textContent = `From: a partner farm, ${f.origin}`;
+  el.stampWord.textContent = hero.one.toUpperCase(); el.stampWord.style.fontSize = hero.one.length > 5 ? '12px' : hero.one.length > 4 ? '14.5px' : '';
+  el.stampLocal.textContent = f.local; el.stampLocal.lang = f.lang; el.stampLocal.style.fontFamily = SCRIPT_FONT[f.lang]; el.stampLocal.style.fontSize = f.local.length > 5 ? '11.5px' : '';
+  el.stampOrigin.textContent = f.origin.toUpperCase();
+  el.offerBtn.textContent = `₹${b.price} Trial Pack Offer`;
+  Ambient.items = []; Harvest.bg = null;
+  /* The farm sign is drawn on canvas: once the local script's font is ready, redraw it. */
+  try { if (document.fonts && document.fonts.load) document.fonts.load(`600 11px ${SCRIPT_FONT[f.lang]}`, f.local).then(() => { Harvest.bg = null; }, () => {}); } catch (e) { /* ignore */ }
+}
+
 /* Buttons. */
 let startBusy = false;
 onTap(el.startBtn, async () => {
@@ -2124,10 +2689,12 @@ onTap(el.millBtn, () => Bake.tapMill());
 onTap(el.bakeBtn, () => Bake.pressBake());
 onTap(el.packBtn, () => Bake.tapPack());
 onTap(el.tapBite, () => Bite.tapBite());
+onTap(el.tearBtn, () => Bite.tearOpen('button'));
 onTap(el.cam, () => Bite.tapBite());
 onTap(el.offerBtn, () => openOffer());
 onTap(el.shareBtn, () => shareScore());
 onTap(el.againBtn, () => { Sound.init(); startGame(); });
+onTap(el.pickBtn, () => { Sound.init(); Sound.tap(); showTitle(); });
 onTap(el.sheetClose, () => closeSheet());
 el.sheet.addEventListener('click', (e) => { if (e.target === el.sheet) closeSheet(); });
 
@@ -2181,6 +2748,8 @@ function boot(saved) {
     if (typeof saved.muted === 'boolean') GameState.muted = saved.muted;
   }
   applyPrefsToUI();
+  renderPicker();
+  applyBrand();
   if (DEMO) { el.demoBadge.hidden = false; el.startBtn.textContent = 'Start demo · 60 seconds'; }
   if (window.ResizeObserver) new ResizeObserver(() => resizeCanvas()).observe(el.playfield);
   else window.addEventListener('resize', resizeCanvas);
